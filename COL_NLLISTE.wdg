@@ -1,0 +1,570 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : COL_NLLISTE
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x11ee51420029fdf4
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1+
+      constant
+      	LISTE_TOUS = 0
+      	CRITERE_ATTRIBUT = 1
+      	CRITERE_VALEUR = 2
+      	
+      	ETAT_BROUILLON = 1
+      	ETAT_PROGRAMME = 2
+      	ETAT_ENVOIENCOURS = 3
+      	ETAT_ENVOITERMINE = 4
+      fin
+      
+      STLigneFiltre est une structure
+      	sTexteDescription est une chaine
+      	sCritere1 est une chaine
+      	nOperateur est un entier
+      	nTypeCritere2 est un entier // CRITERE_ATTRIBUT / CRITERE_VALEUR
+      	sCritere2 est une chaine
+      FIN
+      
+      STListeAuto est une structure
+      	nIDListeBase est un entier sur 8
+      	tabFiltre est un tableau de STLigneFiltre
+      FIN
+      
+      STDescriptionListe est une structure
+      	IDNLListe est un entier sur 8
+      	Nom est une chaine
+      	Description est une chaine
+      	EstVisible est un booleen
+      	RecalculAuto est un booleen
+      	ParDefaut est un booleen
+      	tabUtilisateur est un tableau d'entiers sur 8
+      	stRecalculAuto est un STListeAuto
+      FIN
+      
+      STCacheListe est une structure
+      	bCacheValide est un booleen
+      	bDynamique est un booleen
+      	dhRecalcul est un dateheure
+      	tabUtilisateur est un tableau de STInfoUtilisateur
+      FIN
+      
+      // Déclare et initialise le cache des listes
+      gtaListe est un tableau associatif de STCacheListe
+      _InitCache()
+     type : 720896
+  procedures :
+   -
+     name : NL_Liste_Crée
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1292059521374101226
+     type_code : 15
+     code : |1+
+      // Résumé : Crée une nouvelle liste
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Liste_Crée (<stListe> est STDescriptionListe)
+      //
+      // Paramètres :
+      //	stListe (STDescriptionListe) : Description de la liste
+      // Valeur de retour :
+      // 	entier sur 8 octets : Identifiant de la liste créée
+      // Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Liste_Crée(local stListe est un STDescriptionListe) : entier sur 8
+      
+      // Vérifie si une autre liste ne porte pas déjà ce nom
+      HRecherchePremier(NLListe, Nom, stListe.Nom)
+      si htrouve(NLListe) alors
+      	ErreurDéclenche(1, "Une autre liste porte déjà ce nom")
+      	renvoyer -1
+      FIN
+      	
+      // Crée la liste
+      hraz(NLListe)
+      MémoireVersFichier(stListe,NLListe)
+      
+      // Si la liste est dynamique, on sérialise la structure de calcul
+      si stListe.RecalculAuto ALORS
+      	bufFormule est un buffer
+      	serialise(stListe.stRecalculAuto,bufFormule,psdBinaire)
+      	NLListe.FormuleCalcul = bufFormule
+      FIN
+      
+      hajoute(NLListe)
+      
+      // Si la liste est statique, on ajoute maintenant les abonnements
+      // (si elle est dynamique, ils seront calculés à la demande ou au prochain envoi)
+      si stListe.RecalculAuto=faux ALORS
+      	pour tout nIDUtilisateur de stListe.tabUtilisateur
+      		NL_Utilisateur_AjouteInscription(nIDUtilisateur,NLListe.IDNLListe,_GenereCleConfirmation(),vrai)
+      	FIN
+      FIN
+      
+      renvoyer NLListe.IDNLListe
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	RENVOYER -1
+     type : 458752
+   -
+     name : NL_Liste_TotalInscrits
+     procedure_id : 1305406153735014188
+     type_code : 15
+     code : |1-
+      // Résumé : Renvoie le nombre d'inscrits à la liste spécifiée
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Liste_TotalInscrits (<nIDListe> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDListe (entier sur 8 octets) : ID de la liste
+      // Valeur de retour :
+      // 	entier sans signe sur 4 octets : Nombre d'inscriptions confirmées à la liste
+      //
+      PROCEDURE NL_Liste_TotalInscrits(LOCAL nIDListe est un entier sur 8) : entier sans signe
+        
+      	// Exécution de la requête de calcul
+      	REQ_CompteUtilisateurInscritsSurListe.pIDListe = nIDListe
+      	HExécuteRequête(REQ_CompteUtilisateurInscritsSurListe)
+      	
+      renvoyer REQ_CompteUtilisateurInscritsSurListe.Total
+     type : 458752
+   -
+     name : NL_Liste_Nom
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315475197788683790
+     type_code : 15
+     code : |1-
+      // Résumé : Retourne le nom d'une liste
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Liste_Nom (<nIDListe> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDListe (entier sur 8 octets) : ID de la liste recherchée
+      // Valeur de retour :
+      // 	chaîne UNICODE : Nom de la liste
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Liste_Nom( local nIDListe est un entier sur 8 ) : chaine
+      
+      si nIDListe=LISTE_TOUS ALORS
+      	renvoyer "Tous les utilisateurs (aucun filtre)"
+      FIN
+      
+      HLitRecherchePremier(NLListe,IDNLListe,nIDListe)
+      si htrouve() ALORS
+      	renvoyer NLListe.Nom
+      FIN
+      
+      renvoyer ""
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer ""	
+     type : 458752
+   -
+     name : NL_Liste_Existe
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1316239143648435033
+     type_code : 15
+     code : |1-
+      // Résumé : Teste l'existence d'une liste
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Liste_Existe (<sNomListe> est chaîne)
+      //
+      // Paramètres :
+      //	sNomListe (chaîne UNICODE) : Nom de la liste
+      // Valeur de retour :
+      // 	booléen : Vrai si la liste existe
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Liste_Existe( local sNomListe est une chaine )
+      
+      renvoyer HRecherchePremier(NLListe,Nom,sNomListe)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer faux
+     type : 458752
+   -
+     name : NL_Liste_LitUtilisateur
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1316527164082905279
+     type_code : 15
+     code : |1-
+      // Résumé : Retourne le contenu d'une liste
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Liste_LitUtilisateur (<nIDListe> est entier)
+      //
+      // Paramètres :
+      //	nIDListe (entier) : Identifiant de la liste
+      // Valeur de retour :
+      // 	tableau : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Liste_LitUtilisateur( local nIDListe est un entier ) : tableau de STInfoUtilisateur
+      
+      tabInfo est un tableau de STInfoUtilisateur
+      
+      // Vérifie que la liste existe dans le cache (sinon, l'ajoute)
+      _VerifieListeDansCache(nIDListe)
+      
+      // Si le cache de la liste est invalide, il faut le recalculer
+      si gtaListe[nIDListe].bCacheValide=faux ALORS
+      	_RecalculeCacheListe(nIDListe)
+      FIN
+      
+      renvoyer gtaListe[nIDListe].tabUtilisateur
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer tabInfo
+     type : 458752
+   -
+     name : _InitCache
+     procedure_id : 1316530617237087739
+     type_code : 15
+     code : |1+
+      // Résumé : Initialise le cache des listes d'utilisateurs
+      // Syntaxe :
+      // _InitCache ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE privee _InitCache()
+      
+      // Le cache des listes n'est pas utilisé en AWP
+      si EnModeAWP() ALORS
+      	retour
+      FIN
+      
+      // Construit une entrée de cache vide et invalide
+      stElemCache est un STCacheListe
+      stElemCache.bCacheValide = faux
+      
+      // Ajoute une entrée pour la liste "tous les utilisateurs"
+      gtaListe[LISTE_TOUS] <= stElemCache
+      
+      // Ajoute une entrée pour toutes les listes
+      pour TOUT NLListe
+      	stElemCache.bDynamique = NLListe.RecalculAuto
+      	gtaListe[NLListe.IDNLListe]<=stElemCache
+      FIN
+     type : 458752
+   -
+     name : _VerifieListeDansCache
+     procedure_id : 1316531738223616762
+     type_code : 15
+     code : |1+
+      // Résumé : Vérifie l'existence d'une liste dans le cache
+      // Syntaxe :
+      //_VerifieListeDansCache (<nIDListe> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDListe (entier sur 8 octets) : Identifiant de la liste
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE PRIVÉE _VerifieListeDansCache(local nIDListe est un entier sur 8)
+      
+      si gtaListe[nIDListe]..vide alors
+      	HLitRecherchePremier(NLListe,IDNLListe,nIDListe)
+      	
+      	// Construit une entrée de cache vide et invalide
+      	stElemCache est un STCacheListe
+      	stElemCache.bCacheValide = faux
+      	stElemCache.bDynamique = NLListe.RecalculAuto
+      	gtaListe[nIDListe]<=stElemCache
+      fin
+      
+     type : 458752
+   -
+     name : _RecalculeCacheListe
+     procedure_id : 1316532382468795392
+     type_code : 15
+     code : |1-
+      // Résumé : Met à jour le cache de contenu d'une liste
+      // Syntaxe :
+      //_RecalculeCacheListe (<nIDListe> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDListe (entier sur 8 octets) : Identifiant de la liste
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE PRIVÉE _RecalculeCacheListe(LOCAL nIDListe est un entier sur 8 )
+      
+      stUsr est un STInfoUtilisateur
+      
+      // Vide le cache
+      SupprimeTout(gtaListe[nIDListe].tabUtilisateur)
+      
+      // S'il s'agit d'une liste statique
+      si gtaListe[nIDListe].bDynamique = faux alors
+      	si nIDListe>0 alors
+      		// Recalcule la liste des membres de la liste
+      		HExécuteRequête(REQ_VisuUtilisateur,hRequêteDéfaut,nIDListe)
+      		POUR TOUT REQ_VisuUtilisateur 
+      			FichierVersMémoire(stUsr,REQ_VisuUtilisateur)
+      			Ajoute(gtaListe[nIDListe].tabUtilisateur,stUsr)		
+      		FIN
+      	sinon
+      		pour TOUT NLUtilisateur 
+      			FichierVersMémoire(stUsr,NLUtilisateur)
+      			Ajoute(gtaListe[nIDListe].tabUtilisateur,stUsr)		
+      		FIN
+      	fin
+      	
+      	// Le cache est valide
+      	gtaListe[nIDListe].bCacheValide = vrai
+      sinon
+      	// Liste dynamique : le cache n'est jamais valide
+      	stListe est un STDescriptionListe = NL_Liste_LitInfo(nIDListe)
+      	
+      	// Récupère la liste de base
+      	nIDListeBase est un entier sur 8 = stListe.stRecalculAuto.nIDListeBase
+      	gtaListe[nIDListe].tabUtilisateur = NL_Liste_LitUtilisateur(nIDListeBase)
+      	
+      	// S'il y a des critères supplémentaires, il faut les évaluer
+      	SI stListe.stRecalculAuto.tabFiltre..Occurrence>0 ALORS
+      		POUR TOUT stFiltre de stListe.stRecalculAuto.tabFiltre
+      			pour nligne=gtaListe[nIDListe].tabUtilisateur..Occurrence _a_ 1 pas -1 // Parcours depuis la fin pour pouvoir supprimer sans affecter la boucle
+      			//POUR TOUT stUsr,nLigne de gtaListe[nIDListe].tabUtilisateur depuisfin		
+      				stUsr = gtaListe[nIDListe].tabUtilisateur[nligne]
+      				SI NL_Utilisateur_VerifieCritere(stUsr,stFiltre)=Faux ALORS
+      					Supprime(gtaListe[nIDListe].tabUtilisateur,nLigne)
+      				FIN
+      			FIN
+      		FIN
+      	FIN
+      	
+      fin
+     type : 458752
+   -
+     name : NL_Liste_LitInfo
+     procedure_id : 1316550717715844845
+     type_code : 15
+     code : |1+
+      // Résumé : Retourne les infos d'une liste
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Liste_LitInfo (<nIDListe> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDListe (entier sur 8 octets) : Identifiant de la liste
+      // Valeur de retour :
+      // 	STDescriptionListe : Infos de la liste
+      //
+      PROCEDURE NL_Liste_LitInfo( local nIDListe est un entier sur 8 ) : STDescriptionListe
+      
+      stListe est un STDescriptionListe
+      
+      HLitRecherchePremier(NLListe,IDNLListe,nIDListe)
+      FichierVersMémoire(stListe,NLListe)
+      
+      SI stListe.RecalculAuto ALORS
+      	bufFormule est un buffer = NLListe.FormuleCalcul
+      	deserialise(stListe.stRecalculAuto,bufFormule,psdBinaire)
+      FIN
+      
+      
+      renvoyer stListe
+      
+     type : 458752
+   -
+     name : NL_Liste_Supprime
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1316590437583236405
+     type_code : 15
+     code : |1-
+      // Résumé : Supprime une liste
+      // Syntaxe :
+      //NL_Liste_Supprime (<nIDListe> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDListe (entier sur 8 octets) : Identifiant de la liste
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Liste_Supprime( LOCAL nIDListe est un entier sur 8 )
+      
+      HLitRecherchePremier(NLListe,IDNLListe,nIDListe,hBlocageEcriture)
+      
+      // Il faut désinscrire tous les utilisateurs
+      pour TOUT NLUtilisateur_NLListe AVEC IDNLListe = nIDListe
+      	HSupprime(NLUtilisateur_NLListe)
+      FIN
+      
+      HSupprime(NLListe)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	retour
+     type : 458752
+   -
+     name : NL_Liste_Modifie
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1316633520460938117
+     type_code : 15
+     code : |1+
+      // Résumé : Modifie les propriétés d'une liste (attention : ne modifie pas les utilisateurs dans le cas d'un liste statique)
+      // Syntaxe :
+      //NL_Liste_Modifie (<nIDListe> est entier sur 8 octets, <stDescListe> est STDescriptionListe)
+      //
+      // Paramètres :
+      //	nIDListe (entier sur 8 octets) : Identifiant de la liste
+      //	stDescListe (STDescriptionListe) : Description de la liste
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Liste_Modifie( local nIDListe est un entier sur 8, local stDescListe est un STDescriptionListe )
+      
+      // Se positionne sur la liste à modifier
+      HlitRecherchePremier(NLListe, IDNLListe, nIDListe,hBlocageEcriture)
+      SI HTrouve(NLListe)=faux ALORS
+      	ErreurDéclenche(1, "Liste non trouvée")
+      	retour
+      FIN
+      
+      // Modifie la liste
+      MémoireVersFichier(stDescListe,NLListe)
+      
+      hmodifie(NLListe)
+      
+      CAS ERREUR:
+      ErreurPropage()
+      retour
+      
+      
+     type : 458752
+   -
+     name : NL_Liste_Liste
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1355547556184008069
+     type_code : 15
+     code : |1+
+      // Résumé : Retourne la liste des liste d'utilisateurs
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Liste_Liste ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	tableau : tableau des descriptions des listes d'utilisateurs
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Liste_Liste() : tableau de STDescriptionListe
+      
+      tabListe est un tableau de STDescriptionListe
+      
+      stDescListe est un STDescriptionListe
+      pour TOUT NLListe 
+      	FichierVersMémoire(stDescListe,NLListe)
+      	ajoute(tabListe,stDescListe)
+      FIN
+      
+      RENVOYER tabListe
+      
+      CAS ERREUR:
+      ErreurPropage()
+      SupprimeTout(tabListe)
+      RENVOYER tabListe
+      
+     type : 458752
+   -
+     name : NL_Liste_Compte
+     procedure_id : 1357456278535253054
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Liste_Compte ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	entier : // 	Aucune
+      //
+      PROCEDURE NL_Liste_Compte() : entier
+      
+      renvoyer HNbEnr(NLListe)
+     type : 458752
+   -
+     name : NL_Liste_ListeAttribut
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1358214890109983717
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Liste_ListeAttribut (<nIDNListe> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDNListe (entier sur 8 octets) : <indiquez ici le rôle de nIDNListe>
+      // Valeur de retour :
+      // 	tableau associatif : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Liste_ListeAttribut( LOCAL nIDNListe est un entier sur 8 )
+      
+      taAttr est un tableau associatif de chaines
+      
+      taAttr["IDNL"] = nIDNListe
+      
+      RENVOYER taAttr
+      
+      CAS ERREUR:
+      ErreurPropage()
+      RENVOYER taAttr
+      
+     type : 458752
+   -
+     name : NL_Liste_InvalideCache
+     procedure_id : 1362581952413237875
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //NL_Liste_InvalideCache (<nIDListe> est entier)
+      //
+      // Paramètres :
+      //	nIDListe (entier) : <indiquez ici le rôle de nIDListe>
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE NL_Liste_InvalideCache( local nIDListe est un entier )
+      
+      si gtaListe[nIDListe]..vide=faux alors
+      	gtaListe[nIDListe].bCacheValide = faux
+      fin
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x1fc514644f35d239
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

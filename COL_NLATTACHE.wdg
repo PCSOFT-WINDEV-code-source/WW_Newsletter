@@ -1,0 +1,392 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : COL_NLATTACHE
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x124c18ee06c746d4
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1+
+      constant
+      	ATTACHE_NOM_ID_FACEBOOK = "ID_FACEBOOK"
+      	ATTACHE_NOM_ID_TWITTER = "ID_TWITTER"
+      	ATTACHE_NOM_ID_GOOGLE_PLUS = "ID_GOOGLE_PLUS"
+      fin
+      
+      STInfoFamille est une structure
+      	Famille est une chaine
+      FIN
+      
+      STInfoAttache est une structure
+      	IDNLAttache est un entier sur 8
+      	Nom est une chaine
+      	Type est une chaîne
+      	Description est une chaîne
+      	Taille est un entier
+      	Famille est une chaîne 
+      	Contenu est un buffer
+      FIN
+     type : 720896
+  procedures :
+   -
+     name : NL_Attache_ListeFamille
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318468218866694388
+     type_code : 15
+     code : |1-
+      // Résumé : Liste les familles d'attachements
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Attache_ListeFamille ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	tableau : Liste des familles
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attache_ListeFamille() : tableau de STInfoFamille
+      
+      tabFamille est un tableau de STInfoFamille
+      
+      HExécuteRequête(REQ_ListeFamilleAttache)
+      
+      FichierVersTableau(tabFamille,REQ_ListeFamilleAttache,Famille)
+      
+      renvoyer tabFamille
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	RENVOYER tabFamille
+     type : 458752
+   -
+     name : NL_Attache_Ajoute
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318494091754792559
+     type_code : 15
+     code : |1+
+      // Résumé : Ajoute un nouvel attachement
+      // Syntaxe :
+      //NL_Attache_Ajoute (<stAttach> est STInfoAttache)
+      //
+      // Paramètres :
+      //	stAttach (STInfoAttache) : <indiquez ici le rôle de stAttach>
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attache_Ajoute( local stAttach est un STInfoAttache)
+      
+      hraz(NLAttache)
+      
+      MémoireVersFichier(stAttach,NLAttache)
+      
+      // Calcul du hash
+      NLAttache.Hash = HashChaîne(ALGO_HASH,stAttach.Contenu)
+      
+      hajoute(NLAttache)
+      
+      CAS ERREUR:
+      ErreurPropage()
+     type : 458752
+   -
+     name : NL_Attache_ListeParFamille
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318510073354825141
+     type_code : 15
+     code : |1-
+      // Résumé : Retourne la liste des attachements d'une famille
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Attache_ListeParFamille (<sFamille> est chaîne [, <bAvecContenu> est booléen])
+      //
+      // Paramètres :
+      //	sFamille (chaîne UNICODE) : Nom de la famille (chaine vide pour tous les attachements)
+      //	bAvecContenu (booléen - valeur par défaut=0) : Indique si la fonction doit retourner le contenu de l'image
+      // Valeur de retour :
+      // 	tableau : tableau des attachements
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attache_ListeParFamille( local sFamille est une chaine , local bAvecContenu est un booléen = faux )
+      
+      tabAttach est un tableau de STInfoAttache
+      tabAttachVide est un tableau de STInfoAttache
+      
+      pour TOUT NLAttache AVEC Famille [= sFamille
+      	stAttach est un STInfoAttache
+      	
+      	FichierVersMémoire(stAttach,NLAttache)
+      	si bAvecContenu=faux alors stAttach.Contenu = ""
+      	
+      	ajoute(tabAttach,stAttach)
+      FIN
+      
+      renvoyer tabAttach
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer tabAttachVide
+     type : 458752
+   -
+     name : NL_Attache_Lit
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318525423580886691
+     type_code : 15
+     code : |1-
+      // Résumé : Lit les infos d'un attachement
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Attache_Lit (<nIDAttach> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDAttach (entier sur 8 octets) : <indiquez ici le rôle de nIDAttach>
+      // Valeur de retour :
+      // 	STInfoAttache : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attache_Lit( local nIDAttach est un entier sur 8 ) : STInfoAttache
+      
+      stInfo est un STInfoAttache
+      
+      si nIDAttach>0 alors
+      	HLitRecherchePremier(NLAttache,IDNLAttache,nIDAttach)
+      	FichierVersMémoire(stInfo,NLAttache)
+      sinon
+      	stInfo.Contenu = fChargeBuffer(completerep(frepexe())+"imgdefaut.png")
+      	stInfo.Description = "image par défaut"
+      	stInfo.IDNLAttache = 0
+      	stInfo.Type = "image/png"
+      	stInfo.Taille = ftaille(ComplèteRep(fRepExe())+"imgdefaut.png")
+      fin
+      
+      renvoyer stInfo
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer stInfo
+     type : 458752
+   -
+     name : NL_Attache_Supprime
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318772890883614737
+     type_code : 15
+     code : |1+
+      // Résumé : Supprime une pièce jointe
+      // Syntaxe :
+      //NL_Attache_Supprime (<nIDAttach> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDAttach (entier sur 8 octets) : Identifiant
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attache_Supprime( local nIDAttach est un entier sur 8 )
+      
+      HLitRecherchePremier(NLAttache,IDNLAttache,nIDAttach,hBlocageEcriture)
+      si htrouve(NLAttache)=faux ALORS
+      	ErreurDéclenche(1,"Pièce jointe non trouvée")
+      	retour
+      FIN
+      
+      HSupprime(NLAttache)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+     type : 458752
+   -
+     name : NL_GenereURLAttach
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318777061301041726
+     type_code : 15
+     code : |1-
+      // Résumé : Génère l'URL pour accéder à un attachement
+      // Syntaxe :
+      //[ <Résultat> = ] NL_GenereURLAttach (<nIDAttach> est entier sur 8 octets, <nLargeur> est entier, <nHauteur> est entier, <sToken> est chaîne)
+      //
+      // Paramètres :
+      //	nIDAttach (entier sur 8 octets) : Identifiant dans NLAttach
+      //	nLargeur (entier) : Largeur à générer
+      //	nHauteur (entier) : Hauteur à générer
+      //	sToken (chaîne UNICODE) : Token d'ouverture dans NLInstanceAttach
+      // Valeur de retour :
+      // 	chaîne UNICODE : URL
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_GenereURLAttach( local nIDAttach est un entier sur 8, local nLargeur est un entier, local nHauteur est un entier, local sToken est une chaine )
+      
+      sAdressePageApercu est une chaine = pageadresse(visuimage,paCOMPLETE)
+      
+      sURL est une chaine = sAdressePageApercu+"?"+PAGEPARAM_IDATTACH+"="+nIDAttach+"&"+PAGEPARAM_LARGEUR+"="+nLargeur+"&"+PAGEPARAM_HAUTEUR+"="+nHauteur
+      si sToken<>"" alors
+      	sURL += "&"+PAGEPARAM_TOKENOUVERTURE+"="+sToken
+      fin
+      
+      renvoyer sURL
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer ""
+     type : 458752
+   -
+     name : NL_Attache_Modifie
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318788893944988249
+     type_code : 15
+     code : |1-
+      // Résumé : Modifie les propriétés d'un attachement
+      // Syntaxe :
+      //NL_Attache_Modifie (<stAttach> est STInfoAttache)
+      //
+      // Paramètres :
+      //	stAttach (STInfoAttache) : Nouveaux paramètres
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attache_Modifie( local stAttach est un STInfoAttache )
+      
+      HLitRecherchePremier(NLAttache,IDNLAttache,stAttach.IDNLAttache,hBlocageEcriture)
+      si htrouve()=faux ALORS
+      	ErreurDéclenche(1,"Attachement non trouvé")
+      	retour
+      FIN
+      
+      MémoireVersFichier(stAttach,NLAttache)
+      
+      hmodifie(NLAttache)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	
+     type : 458752
+   -
+     name : NL_Attache_Construit
+     procedure_id : 1318830486417705611
+     type_code : 15
+     code : |1-
+      // Résumé : Charge et redimensionne un attachement
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Attache_Construit (<nIDAtt> est entier sur 8 octets, <nLargeur> est entier, <nHauteur> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDAtt (entier sur 8 octets) : ID de l'attachement
+      //	nLargeur (entier) : Largeur
+      //	nHauteur (entier sur 8 octets) : Hauteur (si largeur et hauteur sont à 0, l'attachement est renvoyé tel quel)
+      // Valeur de retour :
+      // 	STInfoAttache : Attachement
+      //
+      PROCEDURE NL_Attache_Construit( local nIDAtt est un entier sur 8, local nLargeur est un entier, local nHauteur est un entier sur 8) : STInfoAttache
+      
+      stAttach est un STInfoAttache = NL_Attache_Lit(nIDAtt)
+      
+      // Si on a donné des dimensions, il faut retailler l'image (sinon on l'envoie à 100%)
+      SI nLargeur>0 _OU_ nHauteur>0 ALORS
+      	imgRedim est une image = stAttach.Contenu
+      	dRedimensionne(imgRedim,nLargeur,nHauteur,drHomothétiqueCentré)
+      	stAttach.Type = "image/png"
+      	stAttach.Contenu = imgRedim..image
+      FIN
+      
+      renvoyer stAttach
+     type : 458752
+   -
+     name : NL_Attache_NoteOuverture
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318833303928310973
+     type_code : 15
+     code : |1-
+      // Résumé : Comptabilise une ouverture
+      // Syntaxe :
+      //NL_Attache_NoteOuverture (<sTokenOuverture> est chaîne)
+      //
+      // Paramètres :
+      //	sTokenOuverture (chaîne UNICODE) : token d'ouverture
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attache_NoteOuverture( local sTokenOuverture est une chaine )
+      
+      HLitRecherchePremier(NLInstanceAttache,TokenOuverture,sTokenOuverture,hBlocageEcriture)
+      si htrouve()=Faux ALORS
+      	NL_Log_Ajoute("Un token d'ouverture inexistant a été appelé : "+sTokenOuverture,LOG_WARNING)
+      	retour
+      FIN
+      
+      // Si l'ouverture avait déjà été comptabilisée
+      si NLInstanceAttache.OuvertureDetectee=Vrai ALORS
+      	HDébloqueNumEnr(NLInstanceAttache,hNumEnrEnCours)
+      	retour
+      FIN
+      
+      // Renseigne l'ouverture
+      NLInstanceAttache.OuvertureDetectee = vrai
+      NLInstanceAttache.IPOuverture = NavigateurAdresseIP()
+      NLInstanceAttache.DateHeureOuverture = maintenant()
+      
+      hmodifie(NLInstanceAttache)
+      
+      CAS ERREUR:
+      	// Cas particulier : cette fonction ne propage pas les erreurs qu'elle rencontre mais les enregistre dans le log
+      	NL_Log_Ajoute("Erreur dans NL_Attache_NoteOuverture : "+erreurinfo(errComplet),LOG_ERREUR)
+      	
+     type : 458752
+   -
+     name : NL_Attache_TrouveIDParNom
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1401163914297595769
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Attache_TrouveIDParNom (<sNom> est chaîne)
+      //
+      // Paramètres :
+      //	sNom (chaîne UNICODE) : <indiquez ici le rôle de sNom>
+      // Valeur de retour :
+      // 	entier sur 8 octets : // 	Aucune
+      //
+      // Exemple :
+      // Indiquez ici un exemple d'utilisation.
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attache_TrouveIDParNom( local sNom est une chaine ) : entier sur 8 octets
+      
+      si HLitRecherchePremier(NLAttache,Nom,sNom) alors
+      	RENVOYER NLAttache.IDNLAttache
+      fin
+      
+      ErreurDéclenche(1,"Pièce jointe non trouvée")
+      renvoyer 0
+      
+      
+      CAS ERREUR:
+      ErreurPropage()
+      renvoyer 0
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x1fc514644f07d229
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

@@ -1,0 +1,164 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : COL_OUTILS_NAV
+ major_version : 28
+ minor_version : 0
+ type : 65539
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x11e7e1c8000e86e3
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 41
+  p_codes :
+   -
+     type : 983040
+     role : N
+   -
+     type : 983042
+     role : N
+  procedures :
+   -
+     name : ExécuteDifféré
+     internal_properties : CAAAAAgAAADPX7o1hb+pXI+RQ3Utcf7Tpy9qJhaAZpnAbyPklND6hAYXNl3e9qIlOfDOGKBHFJ9ys8OmXoN4lJq8V3w=
+     procedure_id : 1290248084555535566
+     type_code : 15
+     code : |1-
+      // Résumé : Exécute une procédure WLangage navigateur en différé
+      // Syntaxe :
+      //ExécuteDifféré (<pProcédure> [, <nDélai> est entier])
+      //
+      // Paramètres :
+      //	pProcédure : Nom de la procédure
+      // 	nDélai (entier - valeur par défaut=0) : Délai en centième de secondes
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE ExécuteDifféré(pProcédure, local nDélai est un entier = 0)
+      
+      	externe setTimeout
+      	
+      	// Exécute en différé
+      	setTimeout(pProcédure, (nDélai * 10))
+     type : 458752
+     role : N
+   -
+     name : JQCaretInsertion
+     internal_properties : CAAAAAgAAADPX7o1hb+pXI+RQ3Utcf7Tpy9qJhaAZpnAbyPklND6hAYXNl3e9qIlOfDOGKBHFJ9ys8OmXoN4lJq8V3w=
+     procedure_id : 1355585046974912973
+     type_code : 15
+     code : |1+
+      function JQCaretInsertion(elt, text) {
+      	// Récupère l'élément JQuery
+      	var jqelt = $(elt);
+      	
+      	// Si l'élément n'existe pas
+      	if (jqelt.length === 0 || jqelt.is(":hidden")) {
+      		return;
+      	}
+      	
+      	// Récupère la sélection via createRange
+      	if (document.selection && document.selection.createRange) {
+      		jqelt.focus();
+      		var sel = document.selection.createRange();
+      		// Insère le texte
+      		sel.text = text;
+      		jqelt.focus();
+      		
+      		// Récupère la sélection via selectionStart/End
+      	} else if (jqelt[0].selectionStart || jqelt[0].selectionStart === 0) {
+      		var startPos = jqelt[0].selectionStart;
+      		var endPos = jqelt[0].selectionEnd;
+      		var scrollTop = jqelt.scrollTop();
+      		// Insère le texte
+      		jqelt[0].value = jqelt[0].value.substring(0, startPos) + text + jqelt[0].value.substring(endPos, jqelt[0].value.length);
+      		// Redonne le focus
+      		jqelt.focus();
+      		// Restaure la sélection
+      		jqelt[0].selectionStart = startPos + text.length;
+      		jqelt[0].selectionEnd = startPos + text.length;
+      		// Repositionne
+      		if (scrollTop != 0) jqelt.scrollTop(scrollTop);
+      	} else {
+      		// Ajoute le texte simplement
+      		jqelt[0].value += text;
+      		jqelt.focus();
+      	}
+      }
+     language : JS
+     type : 458752
+     role : N
+   -
+     name : JQCaret
+     internal_properties : CAAAAAgAAADPX7o1hb+pXI+RQ3Utcf7Tpy9qJhaAZpnAbyPklND6hAYXNl3e9qIlOfDOGKBHFJ9ys8OmXoN4lJq8V3w=
+     procedure_id : 1355585343327724803
+     type_code : 15
+     code : |1+
+      function JQCaret(elt, begin, end) {
+      	var range;
+      	
+      	// Récupère l'élément JQuery
+      	var jqelt = $(elt);
+      	
+      	// Si l'élément n'existe pas
+      	if (jqelt.length === 0 || jqelt.is(":hidden")) {
+      		return;
+      	}
+      	
+      	// Si on a appelé JQCaret(<champ>, <position> [, <position>])
+      	if (typeof begin == 'number') {
+      		
+      		// Détermine la position de fin
+      		end = (typeof end === 'number') ? end : begin;
+      		
+      		// Sur chaque occurrence de l'élément
+      		return jqelt.each(function() {
+      			
+      			// Applique la sélection via setSelectionRange
+      			if (jqelt[0].setSelectionRange) {
+      				jqelt[0].setSelectionRange(begin, end);
+      				
+      				// Applique la sélection via createTextRange
+      			} else if (jqelt[0].createTextRange) {
+      				range = jqelt[0].createTextRange();
+      				range.collapse(true);
+      				range.moveEnd('character', end);
+      				range.moveStart('character', begin);
+      				range.select();
+      			}
+      		});
+      		
+      		// Si on a appelé JQCaret(<champ>)
+      	} else {
+      		// Récupère la sélection via setSelectionRange
+      		if (jqelt[0].setSelectionRange) {
+      			begin = jqelt[0].selectionStart;
+      			end = jqelt[0].selectionEnd;
+      			
+      			// Récupère la sélection via createRange
+      		} else if (document.selection && document.selection.createRange) {
+      			range = document.selection.createRange();
+      			begin = 0 - range.duplicate().moveStart('character', -100000);
+      			end = begin + range.text.length;
+      		}
+      		
+      		// Construit un objet {begin: <début>, end: <fin>}
+      		return { begin: begin, end: end };
+      	}
+      }
+     language : JS
+     type : 458752
+     role : N
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : NAV_SansNom1
+resources :
+ string_res :
+  identifier : 0x1fc514645055d297
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

@@ -1,0 +1,1543 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : COL_NLUTILISATEUR
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x121f673b00befa45
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1-
+      constant
+      	PAGEPARAM_CONFIRMATION_EMAIL = "email"
+      	PAGEPARAM_CONFIRMATION_CLE = "cle"
+      	PAGEPARAM_IDLISTE = "idnl"
+      	PAGEPARAM_IDATTACH = "idatt"
+      	PAGEPARAM_HAUTEUR = "height"
+      	PAGEPARAM_LARGEUR = "width"
+      	PAGEPARAM_TOKENOUVERTURE = "tkn="
+      	
+      	MOT_DE_PASSE_INDEFINI = "*"
+      	
+      	// Attributs utilisés par le site
+      	ATTR_MOTDEPASSE = "MOTDEPASSE"
+      	ATTR_TOKEN_REINITMOTDEPASSE = "REINITMDP"
+      	ATTR_IP_INSCRIPTION = "IP_INSCRIPTION"
+      	ATTR_NOM = "NOM"
+      	ATTR_PRENOM = "PRENOM"
+      	ATTR_CIV = "CIV"
+      	ATTR_SOC = "SOC"
+      	ATTR_PAYS = "PAYS"
+      	ATTR_ADMIN = "ADMIN"
+      	ATTR_EMAIL =  "EMAIL"
+      	ATTR_ADRTEST = "EMAILTEST"
+      	ATTR_DATE_INSCRIPTION = "DATE_INSCRIPTION"
+      	ATTR_CLE = "CLE"
+      	
+      	// Types des attributs
+      	TYPEATTR_CHAINE = 1
+      	TYPEATTR_ENTIER = 2
+      	TYPEATTR_DATEHEURE = 3
+      	
+      	// Opérateurs pour les filtres
+      	OP_EGAL = 1
+      	OP_DIFFERENT = 2
+      	OP_SUP = 3
+      	OP_SUPEGAL = 4
+      	OP_INF = 5
+      	OP_INFEGAL = 6
+      	OP_COMMENCEPAR = 7
+      	OP_COMMENCEPASPAR = 8
+      	OP_TERMINEPAR = 9
+      	OP_TERMINEPASPAR = 10
+      	
+      	// Valeur max des opérateurs
+      	OP_MAX = 10
+      
+      	
+      	// Constante de salage des mots de passe
+      	// ATTENTION : si cette valeur est modifié, il faut réinitialiser tous les mots de passe
+      	SEL_MDP = "jsuJB65dc&A=+lOobhj8_@mnb/tf*!"
+      fin
+      
+      STValAttributUtilisateur est une structure
+      	bUtiliseDefaut est un booleen
+      	sValeur est une chaine
+      FIN
+      
+      STInfoUtilisateur est une structure
+      	IDNLUtilisateur est un entier sur 8
+      	Email est une chaine
+      	taAttribut est un tableau associatif de STValAttributUtilisateur
+      FIN
+      
+      STInfoAttribut est une structure
+      	IDNLAttribut est un entier sur 8
+      	Nom est une chaine
+      	Type est un entier
+      	ValeurParDéfaut est une chaîne
+      	ListeValeursPossibles est une chaîne
+      	Description est une chaîne
+      	Systeme est un booleen
+      	Masqué est un booleen
+      FIN
+      
+      
+      gbInitAttributOK est un booléen
+      gtaIDAttributs est un tableau associatif d'entiers sur 8 octets
+      gsUtilisateurConnecté est une chaine
+      gtabOperateurFiltre est un tableau de chaine
+      _InitOperateur()
+     type : 720896
+  procedures :
+   -
+     name : NL_Utilisateur_LitAttribut
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1305875958728695571
+     type_code : 15
+     code : |1+
+      // Résumé : Lit la valeur d'un attribut pour un utilisateur
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_LitAttribut (<sAdresseEmail> est chaîne, <sNomAttribut> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Identifiant de l'utilisateur
+      //	sNomAttribut (chaîne UNICODE) : Nom de l'attribut à lire
+      // Valeur de retour :
+      // 	Type indéterminé : Type de la valeur associée à la valeur
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_LitAttribut(local sAdresseEmail est une chaine, local sNomAttribut est une chaine)
+      
+      	// Recherche l'utilisateur
+      	_RechercheUtilisateur(sAdresseEmail)
+      	
+      	// Cas particulier du pseudo-attribut EMAIL
+      	si sNomAttribut=ATTR_EMAIL ALORS
+      		renvoyer sAdresseEmail
+      	FIN
+      
+      	// Recherche l'attribut
+      	_InitAttribut()
+      	nIDAttribut est un entier sur 8 octets
+      	si EnModeAWP() ALORS
+      		HLitRecherchePremier(NLAttribut, Nom, sNomAttribut)
+      		si pas htrouve(NLAttribut) ALORS
+      			ErreurDéclenche(1, "Attribut inexistant")
+      			renvoyer ""
+      		FIN
+      		nIDAttribut = NLAttribut.IDNLAttribut
+      	sinon
+      		nIDAttribut = gtaIDAttributs[sNomAttribut]
+      	FIN
+      	
+      	// Recherche l'association entre l'attribut et l'utilisateur
+      	HLitRecherchePremier(NLUtilisateur_NLAttribut, UnicitéAttributParUtilisateur, [nIDAttribut, NLUtilisateur.IDNLUtilisateur])
+      	si htrouve()=faux ALORS
+      		// On n'a pas trouvé de correspondance
+      		// Il faut rechercher la description de l'attribut 
+      		HLitRecherchePremier(NLAttribut,IDNLAttribut,nIDAttribut)
+      		si htrouve()=faux ALORS
+      			// L'attribut n'existe pas (!)
+      			ErreurDéclenche(1, "Attribut inexistant")
+      			RENVOYER ""
+      		FIN
+      		// Retourne la valeur par défaut
+      		renvoyer NLAttribut.ValeurParDéfaut		
+      	FIN
+      
+      	// Renvoie la valeur de l'attribut
+      	renvoyer NLUtilisateur_NLAttribut.Valeur
+      	
+      CAS ERREUR:
+      	ErreurPropage()
+      	RENVOYER ""
+     type : 458752
+   -
+     name : NL_Utilisateur_Ajoute
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315052199302344604
+     type_code : 15
+     code : |1-
+      // Résumé : Ajoute un nouvel utilisateur
+      // Syntaxe :
+      //NL_Utilisateur_Ajoute (<sAdresseEmail> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse email à inscrire
+      // Valeur de retour :
+      // 	Aucune
+      //
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_Ajoute( local sAdresseEmail est une chaine )
+      
+      hraz(NLUtilisateur)
+      NLUtilisateur.Email = sAdresseEmail
+      hajoute(NLUtilisateur)
+      
+      NL_Liste_InvalideCache(LISTE_TOUS)
+      
+      
+      CAS ERREUR:
+      	erreurpropage()
+     type : 458752
+   -
+     name : NL_Utilisateur_Existe
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315052890793747026
+     type_code : 15
+     code : |1-
+      // Résumé : Test de l'existence d'un utilisateur
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_Existe (<sAdresseEmail> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse email à rechercher
+      // Valeur de retour :
+      // 	booléen : Vrai si l'utilisateur est déjà enregistré
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_Existe( local sAdresseEmail est une chaine ) : booleen
+      
+      HLitRecherchePremier(NLUtilisateur,Email,sAdresseEmail)
+      
+      renvoyer htrouve()
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer faux
+     type : 458752
+   -
+     name : NL_Utilisateur_AjouteInscriptions
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315063477896494937
+     type_code : 15
+     code : |1-
+      // Résumé : Ajoute des inscriptions pour un utilisateur
+      // Syntaxe :
+      //NL_Utilisateur_AjouteInscriptions (<sAdresseEmail> est chaîne, <sListeInscription> est chaîne [, <nOption> est entier])
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse de l'utilisateur
+      //	sListeInscription (chaîne UNICODE) : Liste des NL à ajouter (séparée par des ;)
+      //	nOption (entier - valeur par défaut=0) : Options (ex. : ignorer le double opt-in pour les appels depuis la gestion de profil)
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_AjouteInscriptions( local sAdresseEmail est une chaine , local sListeInscription est une chaine, local nOption est un entier = 0 )
+      
+      // Recherche l'utilisateur
+      _RechercheUtilisateur(sAdresseEmail)
+      
+      // Paramètre de double opt-in (après inscription, l'utilisateur doit cliquer sur un lien envoyé par email pour valider son inscription)
+      bDoubleOptIn est un booléen = val(NL_LitParam(PARAM_DOUBLE_OPT_IN)) _et_ (etbinaire(nOption,IGNORE_DOUBLE_OPTIN)=0)
+      
+      // Construit une clé de confirmation (pour le double opt-in ou pour la désinscription)
+      sCleConf est une chaine = _GenereCleConfirmation()
+      
+      // Ajoute les inscriptions (si elles n'existent pas déjà)
+      sListeInscriptionsReelles est une chaine
+      POUR TOUTE CHAINE sIDNL DE sListeInscription SEPAREE PAR ";"
+      	si NL_Utilisateur_EstInscrit(sAdresseEmail,Val(sIDNL))=faux alors
+      		NL_Utilisateur_AjouteInscription(NLUtilisateur.IDNLUtilisateur,val(sIDNL),sCleConf,pas bDoubleOptIn)
+      		// Crée la liste des inscription réellement ajoutées
+      		sListeInscriptionsReelles += [";"]+sIDNL
+      	fin
+      FIN
+      
+      // Si on a réellement ajouté des inscription et que le double opt-in est utilisé, il faut envoyer le mail de confirmation
+      si bDoubleOptIn alors
+      	NL_Utilisateur_GenereMailDoubleOptIn(sAdresseEmail,sListeInscriptionsReelles,sCleConf)
+      fin
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	
+     type : 458752
+   -
+     name : NL_Utilisateur_EstInscrit
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315067918893713407
+     type_code : 15
+     code : |1-
+      // Résumé : Cherche si un utilisateur est déjà abonné à une NL
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_EstInscrit (<sAdresseEmail> est chaîne ANSI, <nIDListe> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne ANSI) : Adresse email de l'utilisateur
+      //	nIDListe (entier sur 8 octets) : Identifiant de la liste
+      // Valeur de retour :
+      // 	booléen : Vrai si l'utilisateur est abonné
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_EstInscrit( local sAdresseEmail est une chaine ANSI, local nIDListe est un entier sur 8 )
+      
+      // Recherche l'utilisateur
+      _RechercheUtilisateur(sAdresseEmail)
+      
+      // Recherche l'inscription
+      HLitRecherchePremier(NLUtilisateur_NLListe,UnicitéUtilisateurParListe,[NLUtilisateur.IDNLUtilisateur,nIDListe])
+      renvoyer htrouve()
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer faux
+     type : 458752
+   -
+     name : NL_Utilisateur_GenereMailDoubleOptIn
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315070938256163695
+     type_code : 15
+     code : |1-
+      // Résumé : Génère le mail de double opt-in pour une série d'inscriptions et le met en file d'attente
+      // Syntaxe :
+      //NL_Utilisateur_GenereMailDoubleOptIn (<sAdresseEmail> est chaîne, <sListeInscription> est chaîne, <sCleConfirmation>)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse email inscrite
+      //	sListeInscription (chaîne UNICODE) : Liste des ID des NL inscrites, séparées par des ";"
+      // 	sCleConfirmation : Clé de confirmation
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_GenereMailDoubleOptIn(LOCAL sAdresseEmail est une chaine , local sListeInscription est une chaine, local sCleConfirmation )
+      
+      sListeNom est une chaine
+      POUR TOUTE CHAINE sIDNL DE sListeInscription SEPAREE PAR ";"
+      	HLitRecherchePremier(NLListe,IDNLListe,val(sidnl))
+      	si htrouve() ALORS
+      		sListeNom += [rc]+"* "+NLListe.Nom
+      	FIN
+      FIN
+      
+      cMel est un Email
+      cMel.Expediteur = NL_LitParam(PARAM_EMAIL_EXPEDITEUR)
+      cMel.Destinataire[1] = sAdresseEmail
+      cMel.Sujet = "Confirmation de votre inscription"
+      cMel.Message = ChaîneConstruit([
+      Bonjour,
+      
+      Je suis l'automate de gestion des newsletters de %1
+      J'ai reçu une demande d'inscription pour l'adresse email %2 aux newsletters suivantes : 
+      %3
+      
+      Si vous êtes à l'origine de cette demande, merci de cliquer sur le lien suivant pour la confirmer et ainsi recevoir les newsletters:
+      %4?%5=%6&%7=%8
+      
+      Si vous n'êtes pas à l'origine de cette demande, il vous suffit d'ignorer ce message.
+      
+      Cordialement.
+      ],NL_LitParam(PARAM_NOM_SITE),sAdresseEmail,sListeNom,NL_LitParam(PARAM_URL_PAGE_CONFIRMATION),PAGEPARAM_CONFIRMATION_EMAIL,sAdresseEmail,PAGEPARAM_CONFIRMATION_CLE,sCleConfirmation)
+      
+      NL_EMail_AjouteMessageAEnvoyer(cMel,MAIL_SANS_LISTE,MAIL_SANS_MESSAGE,NLUtilisateur.IDNLUtilisateur,MAIL_PRIORITE_HAUTE)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	
+     type : 458752
+   -
+     name : NL_Utilisateur_ConfirmeInscriptions
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315152211904266677
+     type_code : 15
+     code : |1-
+      // Résumé : Confirme les inscriptions d'un utilisateur (si le double opt-in est utilisé, l'utilisateur ne reçoit pas de mail avant d'avoir confirmé son inscription)
+      // Syntaxe :
+      //NL_Utilisateur_ConfirmeInscriptions (<sAdresseEmail> est chaîne, <sCle> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse email de l'utilisateur
+      //	sCle (chaîne UNICODE) : Clé de confirmation
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_ConfirmeInscriptions( local sAdresseEmail est une chaine , local sCle est une chaine )
+      
+      // Recherche l'utilisateur
+      _RechercheUtilisateur(sAdresseEmail)
+      
+      // Recherche les inscriptions à confirmer et les passe en confirmées
+      HLitRecherchePremier(NLUtilisateur_NLListe,IDNLUtilisateurCleConfirmation,[NLUtilisateur.IDNLUtilisateur,sCle],hBlocageEcriture)
+      tantque htrouve() _et_ pas hendehors()
+      	NLUtilisateur_NLListe.EstConfirmé = vrai
+      	// Génère un nouveau token, il sera utilisé pour le lien de désinscription
+      	NLUtilisateur_NLListe.CleConfirmation = _GenereCleConfirmation()
+      	hmodifie(NLUtilisateur_NLListe)
+      	hlitsuivant(NLUtilisateur_NLListe,IDNLUtilisateurCleConfirmation,hBlocageEcriture)
+      FIN
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	
+     type : 458752
+   -
+     name : _RechercheUtilisateur
+     procedure_id : 1315154230539037726
+     type_code : 15
+     code : |1-
+      // Résumé : Positionne le fichier des utilisateurs sur une adresse donnée
+      // Syntaxe :
+      //_RechercheUtilisateur (<sAdresseEmail>)
+      //
+      // Paramètres :
+      //	sAdresseEmail : Adresse recherchée
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE PRIVÉE _RechercheUtilisateur(sAdresseEmail)
+      
+      SI NLUtilisateur.Email<>sAdresseEmail ALORS
+      	HLitRecherchePremier(NLUtilisateur,Email,sAdresseEmail)
+      	SI HTrouve()=Faux ALORS
+      		ErreurDéclenche(1,ChaîneConstruit("L'utilisateur recherché (%1) n'existe pas.",sAdresseEmail))
+      	FIN
+      FIN
+     type : 458752
+   -
+     name : NL_Utilisateur_ListeAbonnement
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315162957913305010
+     type_code : 15
+     code : |1-
+      // Résumé : Liste les NL auxquelles un utilisateur est abonné
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_ListeAbonnement (<sAdresseEmail> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse de l'utilisateur
+      // Valeur de retour :
+      // 	chaîne UNICODE : Liste des NL au format ID + TAB + Nom
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_ListeAbonnement( local sAdresseEmail est une chaine ) : chaine
+      
+      sListeNL est une chaine
+      HExécuteRequête(REQ_InscriptionsUtilisateur,hRequêteDéfaut,sAdresseEmail)
+      pour TOUT REQ_InscriptionsUtilisateur 
+      	sListeNL += [rc] + REQ_InscriptionsUtilisateur.IDNLListe + tab + REQ_InscriptionsUtilisateur.Nom
+      FIN
+      
+      renvoyer sListeNL
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer ""
+     type : 458752
+   -
+     name : NL_Utilisateur_EcritAttribut
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315165912850968042
+     type_code : 15
+     code : |1+
+      // Résumé : Modifie la valeur d'un attribut pour un utilisateur
+      // Syntaxe :
+      //NL_Utilisateur_EcritAttribut (<sAdresseEmail> est chaîne, <sNomAttribut> est chaîne, <sValAttribut> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Identifiant de l'utilisateur
+      //	sNomAttribut (chaîne UNICODE) : Nom de l'attribut à lire
+      //	sValAttribut (chaîne UNICODE) : Nouvelle valeur de l'attribut pour l'utilisateur
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_EcritAttribut(local sAdresseEmail est une chaine, local sNomAttribut est une chaine, local sValAttribut est une chaine )
+      
+      // Recherche l'utilisateur
+      _RechercheUtilisateur(sAdresseEmail)
+      
+      // Cas particulier du pseudo-attribut EMAIL
+      SI sNomAttribut=ATTR_EMAIL ALORS
+      	HLitRecherchePremier(NLUtilisateur,Email,sAdresseEmail,hBlocageEcriture)
+      	NLUtilisateur.Email = sValAttribut
+      	hmodifie(NLUtilisateur)
+      	retour
+      FIN
+      
+      // Recherche l'attribut
+      _InitAttribut()
+      nIDAttribut est un entier sur 8 octets
+      SI EnModeAWP() ALORS
+      	HLitRecherchePremier(NLAttribut, Nom, sNomAttribut)
+      	SI PAS HTrouve(NLAttribut) ALORS
+      		ErreurDéclenche(1, "Attribut inexistant")
+      		retour
+      	FIN
+      	nIDAttribut = NLAttribut.IDNLAttribut
+      SINON
+      	nIDAttribut = gtaIDAttributs[sNomAttribut]
+      FIN
+      
+      // Recherche si l'association entre l'attribut et l'utilisateur existe
+      HLitRecherchePremier(NLUtilisateur_NLAttribut, UnicitéAttributParUtilisateur, [nIDAttribut, NLUtilisateur.IDNLUtilisateur],hBlocageEcriture)
+      SI HTrouve()=Faux ALORS
+      	// Recherche l'attribut
+      	HLitRecherchePremier(NLAttribut, Nom, sNomAttribut)
+      	si pas htrouve(NLAttribut) ALORS
+      		ErreurDéclenche(1, "Attribut inexistant")
+      		retour
+      	FIN
+      	// Crée l'association entre l'attribut et l'utilisateur
+      	hraz(NLUtilisateur_NLAttribut)
+      	NLUtilisateur_NLAttribut.IDNLUtilisateur = NLUtilisateur.IDNLUtilisateur
+      	NLUtilisateur_NLAttribut.IDNLAttribut = nIDAttribut
+      	NLUtilisateur_NLAttribut.Valeur = sValAttribut
+      	hajoute(NLUtilisateur_NLAttribut)
+      sinon
+      	NLUtilisateur_NLAttribut.Valeur = sValAttribut
+      	hmodifie(NLUtilisateur_NLAttribut)
+      fin	
+      	
+      CAS ERREUR:
+      	ErreurPropage()
+     type : 458752
+   -
+     name : _InitAttribut
+     procedure_id : 1315169524918518577
+     type_code : 15
+     code : |1-
+      // Résumé : Initialisation de la collection de procédures
+      // Syntaxe :
+      //_InitAttribut ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE privee _InitAttribut()
+      
+      si EnModeAWP() ALORS
+      	DéclareContexteAWP(gbInitAttributOK)
+      fin	
+      
+      si gbInitAttributOK=faux alors
+      	// Vérification des attributs obligatoires
+      	_VerifieExistenceAttributSystème(ATTR_MOTDEPASSE,"Mot de passe",TYPEATTR_CHAINE,MOT_DE_PASSE_INDEFINI,"",vrai)
+      	_VerifieExistenceAttributSystème(ATTR_TOKEN_REINITMOTDEPASSE,"Jeton de réinitialisation de mot de passe",TYPEATTR_CHAINE,"","",Vrai)
+      	_VerifieExistenceAttributSystème(ATTR_IP_INSCRIPTION,"Adresse IP d'inscription",TYPEATTR_CHAINE,"","",Vrai)
+      	_VerifieExistenceAttributSystème(ATTR_ADMIN,"Administrateur",TYPEATTR_ENTIER,0,"",Vrai)
+      	_VerifieExistenceAttributSystème(ATTR_ADRTEST,"Adresse email de test",TYPEATTR_ENTIER,0,"",Vrai)
+      	
+      	_VerifieExistenceAttributSystème(ATTR_NOM,"Nom",TYPEATTR_CHAINE,"","",faux)
+      	_VerifieExistenceAttributSystème(ATTR_PRENOM,"Prénom",TYPEATTR_CHAINE,"","",Faux)
+      	_VerifieExistenceAttributSystème(ATTR_CIV,"Civilité",TYPEATTR_CHAINE,"","",Faux)
+      	_VerifieExistenceAttributSystème(ATTR_SOC,"Société",TYPEATTR_CHAINE,"","",Faux)
+      	_VerifieExistenceAttributSystème(ATTR_PAYS,"Pays (code ISO)",TYPEATTR_CHAINE,"","",Faux)
+      	
+      	// Construction du cache des ID d'attributs
+      	pour TOUT NLAttribut 
+      		gtaIDAttributs[NLAttribut.Nom] = NLAttribut.IDNLAttribut
+      	FIN
+      	gbInitAttributOK = vrai
+      FIN
+     type : 458752
+   -
+     name : _VerifieExistenceAttributSystème
+     procedure_id : 1315170439746634865
+     type_code : 15
+     code : |1+
+      // Résumé : Vérifie qu'un attribut est bien présent dans le fichier des attributs (certains attributs sont obligatoires pour que le site fonctionne correctement)
+      // Syntaxe :
+      //_VerifieExistenceAttributSystème (<sNomAttr> est chaîne, <sDescAttr> est chaîne, <nTypeAttr> est entier, <sValDefaut> est chaîne, <sListeVal> est chaîne, <bMasqué> est booléen)
+      //
+      // Paramètres :
+      //	sNomAttr (chaîne UNICODE) : Nom de l'attribut
+      //	sDescAttr (chaîne UNICODE) : Description de l'attribut
+      //	nTypeAttr (entier) : Type de l'attribut
+      //	sValDefaut (chaîne UNICODE) : Valeur par défaut
+      //	sListeVal (chaîne UNICODE) : Liste des valeurs possibles (optionnel, séparées par RC)
+      //	bMasqué (booléen) : <indiquez ici le rôle de bMasqué>
+      // Valeur de retour :
+      // 	Aucune
+      //
+      //	bEstRequis (booléen) : Vrai si l'attribut est obligatoire
+      PROCEDURE privee _VerifieExistenceAttributSystème(local sNomAttr est une chaine, local sDescAttr est une chaine, local nTypeAttr est un entier, local sValDefaut est une chaine, local sListeVal est une chaine , bMasqué est un booleen )
+      
+      HLitRecherchePremier(NLAttribut,Nom,sNomAttr)
+      si htrouve()=faux ALORS
+      	hraz(NLAttribut)
+      	NLAttribut.Nom = sNomAttr
+      	NLAttribut.Description = sDescAttr
+      	NLAttribut.Type = nTypeAttr
+      	NLAttribut.ValeurParDéfaut = sValDefaut
+      	NLAttribut.ListeValeursPossibles = sListeVal
+      	NLAttribut.Systeme = vrai
+      	NLAttribut.Masqué = bMasqué
+      	hajoute(NLAttribut)
+      FIN
+      
+     type : 458752
+   -
+     name : NL_Utilisateur_CréeMotDePasse
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315178149213545881
+     type_code : 15
+     code : |1-
+      // Résumé : Crée un nouveau mot de passe pour un utilisateur
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_CréeMotDePasse (<sAdresseEmail> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse email de l'utilisateur
+      // Valeur de retour :
+      // 	chaîne UNICODE : nouveau mot de passe
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_CréeMotDePasse(LOCAL sAdresseEmail est une chaine) : chaine
+      
+      // Recherche l'utilisateur
+      _RechercheUtilisateur(sAdresseEmail)
+      
+      // Génère le mot de passe et enregistre son hash dans l'attribut de l'utilisateur
+      sMotDePasse est une chaine = GénèreMotdePasse(TAILLE_MOT_DE_PASSE)
+      NL_Utilisateur_EcritAttribut(sAdresseEmail,ATTR_MOTDEPASSE,_HashPasse(sMotDePasse))
+      
+      // Retourne le mot de passe
+      renvoyer sMotDePasse
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer ""
+      	
+     type : 458752
+   -
+     name : NL_Utilisateur_Connexion
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315420333833720437
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_Connexion (<sAdresseEmail> est chaîne, <sMotDePasse> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse email
+      //	sMotDePasse (chaîne UNICODE) : Mot de passe
+      // Valeur de retour :
+      // 	booléen : Vrai si la connexion a réussi
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_Connexion(LOCAL sAdresseEmail est une chaîne,LOCAL sMotDePasse est une chaîne) : booléen
+      
+      // Vérifie l'existence de l'utilisateur
+      si NL_Utilisateur_Existe(sAdresseEmail)=faux ALORS
+      	renvoyer faux
+      FIN
+      
+      // Hash le mot de passe et le compare à celui stocké dans la base
+      sHashPasse est une chaine = _HashPasse(sMotDePasse)
+      si (NL_Utilisateur_LitAttribut(sAdresseEmail,ATTR_MOTDEPASSE)=sHashPasse) ALORS
+      	DéclareContexteAWP(gsUtilisateurConnecté)
+      	gsUtilisateurConnecté = sAdresseEmail
+      	renvoyer vrai
+      FIN
+      
+      renvoyer faux
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer faux
+     type : 458752
+   -
+     name : _HashPasse
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315421343151663416
+     type_code : 15
+     code : |1-
+      // Résumé : Procédure de hashage des mots de passe
+      // Syntaxe :
+      //[ <Résultat> = ] _HashPasse (<sMotDePasse> est chaîne)
+      //
+      // Paramètres :
+      //	sMotDePasse (chaîne UNICODE) : Mot de passe en clair
+      // Valeur de retour :
+      // 	chaîne UNICODE : Mot de passe hashé
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE restreint _HashPasse( local sMotDePasse est une chaine ) : chaine 
+      
+      renvoyer BufferVersHexa(HashChaîne(HA_HMAC_TIGER_192,sMotDePasse+SEL_MDP),4,24)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer ""
+     type : 458752
+   -
+     name : NL_Utilisateur_Connecté
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315425642414993233
+     type_code : 15
+     code : |1-
+      // Résumé : Retourne l'utilisateur connecté (chaine vide s'il n'y en a pas)
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_Connecté ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	chaîne UNICODE : Vrai si un utilisateur est connecté
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_Connecté()
+      
+      si EnModeAWP() alors
+      	DéclareContexteAWP(gsUtilisateurConnecté)
+      fin
+      
+      renvoyer gsUtilisateurConnecté
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer ""
+     type : 458752
+   -
+     name : NL_Utilisateur_Deconnexion
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315426226530944133
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_Deconnexion ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	booléen : Vrai si la connexion a réussi
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      //	sAdresseEmail (chaîne UNICODE) : Adresse email
+      //	sMotDePasse (chaîne UNICODE) : Mot de passe
+      PROCEDURE NL_Utilisateur_Deconnexion()
+      
+      gsUtilisateurConnecté = ""
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer faux
+     type : 458752
+   -
+     name : NL_Utilisateur_GenereMailReinitialisationMotDePasse
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315436384137582684
+     type_code : 15
+     code : |1+
+      // Résumé : Génère un email pour réinitialiser un mot de passe
+      // Syntaxe :
+      //NL_Utilisateur_GenereMailReinitialisationMotDePasse (<sAdresseEmail> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse email
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_GenereMailReinitialisationMotDePasse(LOCAL sAdresseEmail est une chaine)
+      
+      // Génère un token de réinitialisation (inclus dans le lien du mail, pour éviter que n'importe qui accède à la page)
+      sTokenReinit est une chaine = _GenereCleConfirmation()
+      NL_Utilisateur_EcritAttribut(sAdresseEmail,ATTR_TOKEN_REINITMOTDEPASSE,sTokenReinit)
+      
+      cMel est un Email
+      cMel.Expediteur = NL_LitParam(PARAM_EMAIL_EXPEDITEUR)
+      cMel.Destinataire[1] = sAdresseEmail
+      cMel.Sujet = "Réinitialisation du mot de passe"
+      cMel.Message = ChaîneConstruit([
+      Bonjour,
+      
+      Je suis l'automate de gestion des newsletters de %1.
+      J'ai reçu une demande de réinitialisation de mot de passe pour l'adresse email %2 .
+      	
+      Si vous êtes à l'origine de cette demande, merci de cliquer sur le lien suivant pour accéder à la page de réinitialisation :
+      %3?%4=%5&%6=%7
+      	
+      Si vous n'êtes pas à l'origine de cette demande, il vous suffit d'ignorer ce message.
+      
+      Cordialement.
+      ],NL_LitParam(PARAM_NOM_SITE),sAdresseEmail,NL_LitParam(PARAM_URL_PAGE_REINITIALISATION),PAGEPARAM_CONFIRMATION_EMAIL,sAdresseEmail,PAGEPARAM_CONFIRMATION_CLE,sTokenReinit)
+      
+      NL_EMail_AjouteMessageAEnvoyer(cMel,MAIL_SANS_LISTE,MAIL_SANS_MESSAGE,NLUtilisateur.IDNLUtilisateur,MAIL_PRIORITE_HAUTE)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      
+     type : 458752
+   -
+     name : NL_Utilisateur_ChangeMotDePasse
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315445094342462027
+     type_code : 15
+     code : |1-
+      // Résumé : Change le mot de passe d'un utilisateur
+      // Syntaxe :
+      //NL_Utilisateur_ChangeMotDePasse (<sAdresseEmail> est chaîne, <sMotDePasse> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse email
+      //	sMotDePasse (chaîne UNICODE) : Nouveau mot de passe
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_ChangeMotDePasse(LOCAL sAdresseEmail est une chaine, local sMotDePasse est une chaine)
+      
+      // Recherche l'utilisateur
+      _RechercheUtilisateur(sAdresseEmail)
+      
+      // Génère le mot de passe et enregistre son hash dans l'attribut de l'utilisateur
+      NL_Utilisateur_EcritAttribut(sAdresseEmail,ATTR_MOTDEPASSE,_HashPasse(sMotDePasse))
+      
+      CAS ERREUR:
+      ErreurPropage()
+     type : 458752
+   -
+     name : NL_Utilisateur_Desinscriptions
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315449277650298604
+     type_code : 15
+     code : |1-
+      // Résumé : Désinscrit un utilisateur d'une ou plusieurs NL
+      // Syntaxe :
+      //NL_Utilisateur_Desinscriptions (<sAdresseEmail> est chaîne, <sListeDesinscription> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse de l'utilisateur
+      //	sListeDesinscription (chaîne UNICODE) : Liste des NL à supprimer (séparée par des ;)
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_Desinscriptions( LOCAL sAdresseEmail est une chaine , local sListeDesinscription est une chaine )
+      
+      // Recherche l'utilisateur
+      _RechercheUtilisateur(sAdresseEmail)
+      
+      // Supprime les inscriptions
+      POUR TOUTE CHAÎNE sIDNL DE sListeDesinscription SEPAREE PAR ";"
+      	SI NL_Utilisateur_EstInscrit(sAdresseEmail,Val(sIDNL)) ALORS
+      		HSupprime(NLUtilisateur_NLListe)
+      	FIN
+      FIN
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	retour
+     type : 458752
+   -
+     name : _GenereCleConfirmation
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315454423026052607
+     type_code : 15
+     code : |1-
+      // Résumé : Génère une clé de confirmation, cette clé est envoyée par email après une inscription pour valider que l'utilisateur existe et veut s'inscrire
+      // Syntaxe :
+      //[ <Résultat> = ] _GenereCleConfirmation ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	chaîne UNICODE : Clé de confirmation
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE _GenereCleConfirmation()
+      
+      sCle est une chaine
+      BOUCLE (TAILLE_CLE_CONFIRMATION)
+      	sCle += caract(64+hasard(1,26))
+      FIN
+      
+      renvoyer sCle
+      
+      CAS ERREUR:
+      	erreurpropage()
+      	renvoyer ""
+     type : 458752
+   -
+     name : NL_Utilisateur_VérifieCle
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315473582879163140
+     type_code : 15
+     code : |1-
+      // Résumé : Vérifie la clé d'un utilisateur pour une liste
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_VérifieCle (<sAdresseEmail> est chaîne, <nIDListe> est entier sur 8 octets, <sCle> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse email
+      //	nIDListe (entier sur 8 octets) : ID de la liste
+      //	sCle (chaîne UNICODE) : Clé associée
+      // Valeur de retour :
+      // 	booléen : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_VérifieCle( local sAdresseEmail est une chaîne, LOCAL nIDListe est un entier sur 8, local sCle est une chaine )
+      
+      // Recherche l'utilisateur
+      _RechercheUtilisateur(sAdresseEmail)
+      
+      // Recherche l'inscription
+      HLitRecherchePremier(NLUtilisateur_NLListe,UnicitéUtilisateurParListe,[NLUtilisateur.IDNLUtilisateur,nIDListe])
+      si htrouve() ALORS
+      	renvoyer sCle=NLUtilisateur_NLListe.CleConfirmation
+      FIN
+      
+      renvoyer faux
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer faux
+     type : 458752
+   -
+     name : NL_Utilisateur_DoubleOptIn
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315515875400844345
+     type_code : 15
+     code : |1-
+      // Résumé : Renvoie les emails de double opt-in
+      // Syntaxe :
+      //NL_Utilisateur_DoubleOptIn (<sAdresseEmail> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse email
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_DoubleOptIn( local sAdresseEmail est une chaine )
+      
+      // Recherche l'utilisateur
+      _RechercheUtilisateur(sAdresseEmail)
+      
+      // Construit une nouvelle clé de confirmation
+      sCleConf est une chaine = _GenereCleConfirmation()
+      
+      sListeInscriptionsReelles est une chaine
+      HLitRecherchePremier(NLUtilisateur_NLListe,IDNLUtilisateur,NLUtilisateur.IDNLUtilisateur,hBlocageEcriture)
+      tantque htrouve() _et_ pas HEnDehors()
+      	si NLUtilisateur_NLListe.EstConfirmé=faux ALORS
+      		NLUtilisateur_NLListe.CleConfirmation = sCleConf
+      		hmodifie(NLUtilisateur_NLListe)
+      		// Crée la liste des inscription réinitialisées
+      		sListeInscriptionsReelles += [";"]+NLUtilisateur_NLListe.IDNLListe
+      	sinon
+      		HDébloqueNumEnr(NLUtilisateur_NLListe,hNumEnrEnCours)
+      	FIN
+      	HLitSuivant(NLUtilisateur_NLListe,IDNLUtilisateur,hBlocageEcriture)
+      FIN
+      
+      // Si on a réellement ajouté des inscription et que le double opt-in est utilisé, il faut envoyer le mail de confirmation
+      NL_Utilisateur_GenereMailDoubleOptIn(sAdresseEmail,sListeInscriptionsReelles,sCleConf)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	
+     type : 458752
+   -
+     name : _InitOperateur
+     procedure_id : 1316184292568874145
+     type_code : 15
+     code : |1+
+      // Résumé : Initialise le tableau global des opérateurs des filtres
+      // Syntaxe :
+      // _InitOperateur ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE privee _InitOperateur()
+      
+      si EnModeAWP() alors retour
+      
+      dbgAssertion(gtabOperateurFiltre..Occurrence=0)
+      
+      ajoute(gtabOperateurFiltre,"égal à") // OP_EGAL = 1
+      Ajoute(gtabOperateurFiltre,"différent de") // OP_DIFFERENT = 2
+      Ajoute(gtabOperateurFiltre,"supérieur à") // OP_SUP = 3
+      Ajoute(gtabOperateurFiltre,"supérieur ou égal à") // OP_SUPEGAL = 4
+      Ajoute(gtabOperateurFiltre,"inférieur à") // OP_INF = 5
+      Ajoute(gtabOperateurFiltre,"inférieur ou égal à") // OP_INFEGAL = 6
+      Ajoute(gtabOperateurFiltre,"commence par") // OP_COMMENCEPAR = 7
+      Ajoute(gtabOperateurFiltre,"ne commence pas par") // OP_COMMENCEPASPAR = 8
+      Ajoute(gtabOperateurFiltre,"termine par") // OP_TERMINEPAR = 9
+      Ajoute(gtabOperateurFiltre,"ne termine pas par") // OP_TERMINEPASPAR = 10
+      
+      dbgAssertion(gtabOperateurFiltre..Occurrence=OP_MAX)
+      
+     type : 458752
+   -
+     name : NL_Utilisateur_AjouteInscription
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1316236240244492923
+     type_code : 15
+     code : |1-
+      // Résumé : Ajoute un utilisateur dans une liste
+      // Syntaxe :
+      //NL_Utilisateur_AjouteInscription (<nIDUtilisateur> est entier sur 8 octets, <nIDListe> est entier sur 8 octets, <sCleConf> est chaîne, <bEstConfirme> est booléen)
+      //
+      // Paramètres :
+      //	nIDUtilisateur (entier sur 8 octets) : Identifiant de l'utilisateur
+      //	nIDListe (entier sur 8 octets) : Identifiant de la liste
+      //	sCleConf (chaîne UNICODE) : Clé de confirmation/desabonnement
+      //	bEstConfirme (booléen) : Vrai si l'abonnement est confirmé
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_AjouteInscription( local nIDUtilisateur est un entier sur 8, local nIDListe est un entier sur 8, local sCleConf est une chaine, local bEstConfirme est un booleen)
+      
+      HRAZ(NLUtilisateur_NLListe)
+      
+      NLUtilisateur_NLListe.IDNLListe = nIDListe
+      NLUtilisateur_NLListe.IDNLUtilisateur = nIDUtilisateur
+      NLUtilisateur_NLListe.CleConfirmation = sCleConf
+      NLUtilisateur_NLListe.EstConfirmé = bEstConfirme
+      
+      HAjoute(NLUtilisateur_NLListe)	
+      
+      NL_Liste_InvalideCache(nIDListe)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	
+     type : 458752
+   -
+     name : NL_Utilisateur_LitInfo
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1316264372302232730
+     type_code : 15
+     code : |1-
+      // Résumé : Retourne les infos d'un utilisateur
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_LitInfo (<nIDUtilisateur> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDUtilisateur (entier sur 8 octets) : Identifiant de l'utilisateur
+      // Valeur de retour :
+      // 	STInfoUtilisateur : Infos de l'utilisateur
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_LitInfo( local nIDUtilisateur est un entier sur 8 )
+      
+      stInfoVide est un STInfoUtilisateur
+      stInfo est un STInfoUtilisateur
+      
+      HLitRecherchePremier(NLUtilisateur,IDNLUtilisateur,nIDUtilisateur)
+      si htrouve()=faux ALORS
+      	ErreurDéclenche(1,"L'utilisateur n'existe pas.")
+      	renvoyer stInfoVide
+      FIN
+      
+      FichierVersMémoire(stInfo,NLUtilisateur)
+      
+      // Construction du tableau des attributs avec les valeurs par défaut
+      pour TOUT NLAttribut 
+      	stAttr est un STValAttributUtilisateur
+      	stAttr.sValeur = NLAttribut.ValeurParDéfaut
+      	stAttr.bUtiliseDefaut = vrai
+      	stInfo.taAttribut[NLAttribut.Nom] = stAttr
+      FIN
+      
+      // Remplissage avec les attributs renseignés pour l'utilisateur
+      HExécuteRequête(REQ_AttributUtilisateur,hRequêteDéfaut,nIDUtilisateur)
+      pour TOUT REQ_AttributUtilisateur 
+      	stInfo.taAttribut[REQ_AttributUtilisateur.Nom].sValeur = REQ_AttributUtilisateur.Valeur
+      	stInfo.taAttribut[REQ_AttributUtilisateur.Nom].bUtiliseDefaut = faux
+      FIN
+      
+      RENVOYER stInfo
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer stInfoVide
+     type : 458752
+   -
+     name : NL_Utilisateur_VerifieCritere
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1316539228662677276
+     type_code : 15
+     code : |1-
+      // Résumé : Vérifie si un utilisateur répond à un critère
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_VerifieCritere (<stUsr> est STInfoUtilisateur, <stFiltre> est STLigneFiltre)
+      //
+      // Paramètres :
+      //	stUsr (STInfoUtilisateur) : <indiquez ici le rôle de stUsr>
+      //	stFiltre (STLigneFiltre) : <indiquez ici le rôle de stFiltre>
+      // Valeur de retour :
+      // 	booléen : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_VerifieCritere(local stUsr est un STInfoUtilisateur,local stFiltre est un STLigneFiltre)
+      
+      // Recherche la valeur du critère 1
+      sVal1 est une chaine = NL_Utilisateur_LitAttribut(stUsr.Email,stFiltre.sCritere1)
+      
+      // Recherche la valeur du critère 2
+      sVal2 est une chaine = (stFiltre.nTypeCritere2=CRITERE_VALEUR) ? stFiltre.sCritere2 sinon NL_Utilisateur_LitAttribut(stUsr.Email,stFiltre.sCritere2)
+      
+      selon stFiltre.nOperateur
+      	cas OP_EGAL
+      		renvoyer sVal1=sVal2
+      	CAS OP_DIFFERENT
+      		RENVOYER sVal1<>sVal2
+      	CAS OP_SUP
+      		RENVOYER sVal1>sVal2
+      	CAS OP_SUPEGAL
+      		RENVOYER sVal1>=sVal2
+      	CAS OP_INF
+      		RENVOYER sVal1<sVal2
+      	CAS OP_INFEGAL
+      		RENVOYER sVal1<=sVal2
+      	CAS OP_COMMENCEPAR
+      		RENVOYER sVal1[=sVal2
+      	CAS OP_COMMENCEPASPAR
+      		RENVOYER pas (sVal1[=sVal2)
+      	CAS OP_TERMINEPAR
+      		RENVOYER droite(sVal1,taille(sVal2))=sVal2
+      	CAS OP_TERMINEPASPAR
+      		RENVOYER Droite(sVal1,Taille(sVal2))<>sVal2
+      		
+      
+      	AUTRE CAS
+      		dbgAssertion(faux,"Opérateur de filtre inconnu")
+      		ErreurDéclenche(1,"Opérateur de filtrage inconnu")
+      		renvoyer faux
+      FIN
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer faux
+     type : 458752
+   -
+     name : NL_Attribut_ChargeListe
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318839712084315890
+     type_code : 15
+     code : |1-
+      // Résumé : Retourne la liste des attributs
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Attribut_ChargeListe ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	tableau : Liste des attributs
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attribut_ChargeListe() : tableau de STInfoAttribut
+      
+      tabListeAttr est un tableau de STInfoAttribut
+      
+      FichierVersTableau(tabListeAttr,NLAttribut,Nom)
+      
+      renvoyer tabListeAttr
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer tabListeAttr
+     type : 458752
+   -
+     name : NL_Attribut_Lit
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318842636966572974
+     type_code : 15
+     code : |1-
+      // Résumé : Lit les infos d'un attribut
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Attribut_Lit (<nIDAttr> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDAttr (entier sur 8 octets) : Identifiant de l'attribut
+      // Valeur de retour :
+      // 	STInfoAttribut : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attribut_Lit(local nIDAttr est un entier sur 8) : STInfoAttribut
+      
+      stAttr est STInfoAttribut
+      
+      HLitRecherchePremier(NLAttribut,IDNLAttribut,nIDAttr)
+      
+      FichierVersMémoire(stAttr,NLAttribut)
+      
+      renvoyer stAttr
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer stAttr
+     type : 458752
+   -
+     name : NL_Attribut_Modifie
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318843873920522781
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //NL_Attribut_Modifie (<stAttr> est STInfoAttribut)
+      //
+      // Paramètres :
+      //	stAttr (STInfoAttribut) : <indiquez ici le rôle de stAttr>
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attribut_Modifie( local stAttr est un STInfoAttribut )
+      
+      HLitRecherchePremier(NLAttribut,IDNLAttribut,stAttr.IDNLAttribut,hBlocageEcriture)
+      
+      MémoireVersFichier(stAttr,NLAttribut)
+      
+      hmodifie(NLAttribut)
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	
+     type : 458752
+   -
+     name : NL_Attribut_Cree
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318850947735927480
+     type_code : 15
+     code : |1+
+      // Résumé : Crée un nouvel attribut
+      // Syntaxe :
+      //NL_Attribut_Cree (<stAttr> est STInfoAttribut)
+      //
+      // Paramètres :
+      //	stAttr (STInfoAttribut) : description de l'attribut
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Attribut_Cree(LOCAL stAttr est un STInfoAttribut )
+      
+      hraz(NLAttribut)
+      
+      MémoireVersFichier(stAttr,NLAttribut)
+      
+      hajoute(NLAttribut)
+      
+      
+      CAS ERREUR:
+      ErreurPropage()
+      
+     type : 458752
+   -
+     name : NL_Utilisateur_Supprime
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318870876411365242
+     type_code : 15
+     code : |1-
+      // Résumé : Supprime un utilisateur (supprime en cascade les attributs, les abonnements aux NL et dissocie les emails envoyés)
+      // Syntaxe :
+      //NL_Utilisateur_Supprime (<nIDUser> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDUser (entier sur 8 octets) : Identifiant de l'utilisateur
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_Supprime( local nIDUser est un entier sur 8 )
+      
+      pour TOUT NLUtilisateur_NLListe AVEC IDNLUtilisateur = nIDUser
+      	NL_Liste_InvalideCache(NLUtilisateur_NLListe.IDNLListe)
+      FIN
+      NL_Liste_InvalideCache(LISTE_TOUS)
+      
+      HLitRecherchePremier(NLUtilisateur,IDNLUtilisateur,nIDUser,hBlocageLectureEcriture)
+      HSupprime(NLUtilisateur)
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	
+     type : 458752
+   -
+     name : NL_Utilisateur_RechercheParAttribut
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318876240835352527
+     type_code : 15
+     code : |1-
+      // Résumé : Retourne la liste des utilisateurs qui satisfont un attributs
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_RechercheParAttribut (<sNomAtt> est chaîne, <sValRecherche> est chaîne)
+      //
+      // Paramètres :
+      //	sNomAtt (chaîne UNICODE) : Nom de l'attribut
+      //	sValRecherche (chaîne UNICODE) : Valeur de l'attribut
+      // Valeur de retour :
+      // 	tableau : Liste des utilisateurs
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_RechercheParAttribut( local sNomAtt est une chaîne, local sValRecherche est une chaine ) : tableau de STInfoUtilisateur
+      
+      tabUsr est un tableau de STInfoUtilisateur
+      
+      HExécuteRequête(REQ_RechercheUtilisateurParAttribut,hRequêteDéfaut,sNomAtt,sValRecherche)
+      FichierVersTableau(tabUsr,REQ_RechercheUtilisateurParAttribut)
+      
+      renvoyer tabUsr
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer tabUsr
+     type : 458752
+   -
+     name : NL_Utilisateur_GenereMailTest
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318882537264837541
+     type_code : 15
+     code : |1-
+      // Résumé : Envoie un email de test à une adresse
+      // Syntaxe :
+      //NL_Utilisateur_GenereMailTest (<sAdresseEmail> est chaîne)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : Adresse destinataire
+      // Valeur de retour :
+      // 	Aucune
+      //
+      // 	COL_Email : <indiquez ici le rôle de COL_Email>// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_GenereMailTest(local sAdresseEmail est une chaine)
+      
+      _RechercheUtilisateur(sAdresseEmail)
+      
+      cMel est un Email
+      cMel.Expediteur = NL_LitParam(PARAM_EMAIL_EXPEDITEUR)
+      cMel.Destinataire[1] = sAdresseEmail
+      cMel.Sujet = "Message de test"
+      cMel.Message = ChaîneConstruit([
+      	Bonjour,
+      	
+      	Je suis l'automate de gestion des newsletters de %1
+      	Ceci est un mail de test.
+      	L'adresse %2 a été ajoutée à la liste des emails de test des newsletters.
+      		
+      	Cordialement.
+      ],NL_LitParam(PARAM_NOM_SITE),sAdresseEmail)
+      
+      NL_EMail_AjouteMessageAEnvoyer(cMel,MAIL_SANS_LISTE,MAIL_SANS_MESSAGE,NLUtilisateur.IDNLUtilisateur,MAIL_PRIORITE_HAUTE)
+      
+      CAS ERREUR:
+      ErreurPropage()
+     type : 458752
+   -
+     name : NL_Utilisateur_Compte
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1357456080964549578
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_Compte ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	entier : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_Compte() : entier
+      
+      renvoyer HNbEnr(NLUtilisateur)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer 0
+     type : 458752
+   -
+     name : NL_Utilisateur_DateDernierInscrit
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1357456987209347504
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_DateDernierInscrit ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Type indéterminé : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_DateDernierInscrit()
+      
+      HExécuteRequête(REQ_RechercheAttribut,hRequêteDéfaut,ATTR_DATE_INSCRIPTION)
+      HLitDernier(REQ_RechercheAttribut,Valeur)
+      
+      si HNbEnr(REQ_RechercheAttribut)>0 alors
+      	renvoyer REQ_RechercheAttribut.Valeur
+      fin
+      
+      renvoyer datesys()
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer datesys()
+     type : 458752
+   -
+     name : NL_Utilisateur_ListeAttribut
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1357863346825783301
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_ListeAttribut (<sAdresseEmail> est chaîne, <nIDNL> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	sAdresseEmail (chaîne UNICODE) : <indiquez ici le rôle de nIDUtilisateur>
+      //	nIDNL (entier sur 8 octets) : <indiquez ici le rôle de nIDNL>
+      // Valeur de retour :
+      // 	tableau associatif : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_ListeAttribut( local sAdresseEmail est une chaine, local nIDNL est un entier sur 8 ) : tableau associatif de chaines
+      
+      // Liste les attributs
+      taAttr est un tableau associatif de chaines
+      pour TOUT NLAttribut 
+      	taAttr[NLAttribut.Nom] = NL_Utilisateur_LitAttribut(sAdresseEmail,NLAttribut.Nom)
+      FIN
+      
+      // Ajoute l'email
+      taAttr[ATTR_EMAIL] = sAdresseEmail
+      
+      // Ajoute les attributs de la liste
+      HLitRecherchePremier(NLUtilisateur_NLListe,UnicitéUtilisateurParListe,[NLUtilisateur.IDNLUtilisateur,nIDNL])
+      taAttr[ATTR_CLE] = NLUtilisateur_NLListe.CleConfirmation
+      
+      
+      renvoyer taAttr
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	supprimetout(taAttr)
+      	renvoyer taAttr
+     type : 458752
+   -
+     name : NL_Utilisateur_ProfilParDefaut
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1362576089767620656
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Utilisateur_ProfilParDefaut ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	STInfoUtilisateur : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Utilisateur_ProfilParDefaut() : STInfoUtilisateur
+      
+      stUsrDefaut est un STInfoUtilisateur
+      
+      stUsrDefaut.Email = ""
+      stUsrDefaut.IDNLUtilisateur = -1
+      
+      // Construction du tableau des attributs avec les valeurs par défaut
+      POUR TOUT NLAttribut 
+      	stAttr est un STValAttributUtilisateur
+      	stAttr.sValeur = NLAttribut.ValeurParDéfaut
+      	stAttr.bUtiliseDefaut = Vrai
+      	stUsrDefaut.taAttribut[NLAttribut.Nom] = stAttr
+      FIN
+      
+      stUsrDefaut.taAttribut[ATTR_MOTDEPASSE].bUtiliseDefaut = faux
+      stUsrDefaut.taAttribut[ATTR_MOTDEPASSE].sValeur = _HashPasse("")
+      
+      stUsrDefaut.taAttribut[ATTR_IP_INSCRIPTION].bUtiliseDefaut = faux
+      stUsrDefaut.taAttribut[ATTR_IP_INSCRIPTION].sValeur = NavigateurAdresseIP()
+      
+      stUsrDefaut.taAttribut[ATTR_ADMIN].bUtiliseDefaut = Faux
+      stUsrDefaut.taAttribut[ATTR_ADMIN].sValeur = Faux
+      
+      stUsrDefaut.taAttribut[ATTR_ADRTEST].bUtiliseDefaut = Faux
+      stUsrDefaut.taAttribut[ATTR_ADRTEST].sValeur = Faux
+      
+      stUsrDefaut.taAttribut[ATTR_DATE_INSCRIPTION].bUtiliseDefaut = faux
+      stUsrDefaut.taAttribut[ATTR_DATE_INSCRIPTION].sValeur = datesys()
+      
+      stAttrCle est un STValAttributUtilisateur
+      stAttrCle.bUtiliseDefaut = faux
+      stAttrCle.sValeur = _GenereCleConfirmation()
+      stUsrDefaut.taAttribut[ATTR_CLE] = stAttrCle
+      
+      renvoyer stUsrDefaut
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	VariableRAZ(stUsrDefaut)
+      	renvoyer stUsrDefaut
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x1fc514644fc9d268
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

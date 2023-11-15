@@ -1,0 +1,1340 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : COL_NLMESSAGE
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x124939f8037ecf01
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1+
+      constant
+      	OPTSUIVI_OUVERTURE = 1
+      	OPTSUIVI_LIENS = 2
+      	
+      	BLOC_TEXTE = 1
+      	BLOC_TEXTE_CADRE = 2
+      	BLOC_SEPARATEUR = 3
+      	BLOC_IMAGE = 4
+      	BLOC_GROUPE_IMAGE = 5
+      	BLOC_IMAGE_LIB = 6
+      	BLOC_LIEN_SOCIAUX = 7
+      	BLOC_BOUTON = 8
+      	BLOC_FOOTER_AUTO = 9		// Lien désinscription + image d'ouverture
+      	BLOC_HEADER_AUTO = 10		// Lien pour lire en ligne
+      	
+      	PREFIXE_ATTR	= "[["
+      	SUFFIXE_ATTR	= "]]"
+      	
+      	LIEN_DEFAUT_FACEBOOK = "https://www.facebook.com/%1"
+      	LIEN_DEFAUT_TWITTER = "https://twitter.com/@%1"
+      	LIEN_DEFAUT_GOOGLE_PLUS = "https://plus.google.com/%1/posts"
+      	
+      fin
+      
+      gtabLienSocialDefaut est un tableau de chaine = [ LIEN_DEFAUT_FACEBOOK, LIEN_DEFAUT_TWITTER, LIEN_DEFAUT_GOOGLE_PLUS ]
+      
+      STInfoMessage est une structure
+      	IDNLMessage est un entier sur 8 octets
+      	NomNL est une chaîne
+      	Sujet est une chaine
+      	DateHeureEnvoi est une dateheure
+      	AdresseExpediteur est une chaine
+      	AdresseReplyTo est une chaîne
+      	AdresseNotification est une chaine
+      	FormatDestinataire est une chaine
+      	IDNLListe est un entier sur 8 octets
+      	EstModèle est un booleen
+      	OptionsSuivi est un entier
+      	EtatNL est un entier
+      	
+      	CompteFacebook est une chaîne
+      	CompteTwitter est une chaîne
+      	CompteGooglePlus est une chaine
+      	
+      	sNomListe est une chaine
+      FIN
+      
+      STInfoImage est une structure
+      	nIDAttache est un entier sur 8
+      	nLargeur est un entier
+      	nHauteur est un entier
+      FIN
+      
+      STBlocHTML est une structure
+      	// Type de bloc (voir constante BLOC_xxx)
+      	nTypeBloc est un entier
+      	// Données pour construire le bloc
+      	tabTexte est un tableau de chaines
+      	tabImage est un tableau de STInfoImage	
+      	tabLien est un tableau de chaines
+      	nTailleLigne est un entier
+      	// HTML résultat
+      	sHTMLGénéré est une chaine
+      FIN
+     type : 720896
+  procedures :
+   -
+     name : NL_Message_ListeParEtat
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1317648167780420399
+     type_code : 15
+     code : |1-
+      // Résumé : Liste les newsletters dans un état donné
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_ListeParEtat (<nEtat> est entier)
+      //
+      // Paramètres :
+      //	nEtat (entier) : Etat recherché
+      // Valeur de retour :
+      // 	tableau : Tableau des messages correspondants
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_ListeParEtat( local nEtat est un entier )
+      
+      tabMsg est un tableau de STInfoMessage
+      tabMsgVide est un tableau de STInfoMessage
+      
+      pour TOUT NLMessage AVEC EtatNL = nEtat
+      	si NLMessage.EstModèle=faux alors
+      		stMsg est un STInfoMessage
+      		FichierVersMémoire(stMsg,NLMessage)
+      		stMsg.sNomListe = NL_Liste_Nom(stMsg.IDNLListe)
+      		ajoute(tabMsg,stMsg)
+      	fin
+      FIN
+      
+      renvoyer tabMsg
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer tabMsgVide
+     type : 458752
+   -
+     name : NL_Message_Existe
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1317665008382042023
+     type_code : 15
+     code : |1-
+      // Résumé : Vérifie l'existence d'une NL
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_Existe (<sNomNL> est chaîne)
+      //
+      // Paramètres :
+      //	sNomNL (chaîne UNICODE) : Nom de la NL
+      // Valeur de retour :
+      // 	booléen : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_Existe(local sNomNL est une chaine)
+      
+      HLitRecherchePremier(NLMessage,NomNL,sNomNL)
+      
+      renvoyer htrouve()
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer faux
+     type : 458752
+   -
+     name : NL_Message_Crée
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1317700437579643682
+     type_code : 15
+     code : |1-
+      // Résumé : Crée un nouveau message de NL à partir des informations fournies
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_Crée (<stInfoNL> est STInfoMessage [, <nIDModele> est entier sur 8 octets])
+      //
+      // Paramètres :
+      //	stInfoNL (STInfoMessage) : Description du message
+      //	nIDModele (entier sur 8 octets - valeur par défaut=0) : Identifiant du modèle à recopier
+      // Valeur de retour :
+      // 	Type indéterminé : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_Crée(local stInfoNL est un STInfoMessage, local nIDModele est un entier sur 8 = 0)
+      
+      bufBloc est un buffer
+      sTexte est une chaine
+      SI nIDModele>0 ALORS
+      	HLitRecherchePremier(NLMessage,IDNLMessage,nIDModele)
+      	bufBloc = NLMessage.MessageblocHTML
+      	sTexte = nlmessage.MessageTexte
+      FIN
+      
+      hraz(NLMessage)
+      MémoireVersFichier(stInfoNL,NLMessage)
+      
+      HAjoute(NLMessage,hBlocageEcriture)
+      
+      SI nIDModele>0 ALORS
+      	NLMessage.Messageblochtml = bufBloc
+      	NLMessage.MessageTexte = sTexte
+      	hmodifie(NLMessage)
+      fin
+      
+      renvoyer NLMessage.IDNLMessage
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer 0
+     type : 458752
+   -
+     name : NL_Message_RechercheInfoParID
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1317702490576586447
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_RechercheInfoParID (<nIDNL> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDNL (entier sur 8 octets) : <indiquez ici le rôle de nIDNL>
+      // Valeur de retour :
+      // 	STInfoMessage : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_RechercheInfoParID( LOCAL nIDNL est un entier sur 8 )
+      
+      stInfoMsg est un STInfoMessage
+      
+      HLitRecherchePremier(NLMessage,IDNLMessage,nIDNL)
+      SI HTrouve()=Faux ALORS
+      	ErreurDéclenche(1,"Message non trouvé")
+      FIN
+      
+      FichierVersMémoire(stInfoMsg,NLMessage)
+      
+      RENVOYER stInfoMsg
+      
+      CAS ERREUR:
+      ErreurPropage()
+      RENVOYER stInfoMsg
+      
+     type : 458752
+   -
+     name : NL_Message_RechercheInfoParNom
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1317702580772100671
+     type_code : 15
+     code : |1-
+      // Résumé : Recherche un message
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_RechercheInfoParNom (<sNomNL> est chaîne)
+      //
+      // Paramètres :
+      //	sNomNL (chaîne UNICODE) : Nom du message recherché
+      // Valeur de retour :
+      // 	STInfoMessage : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_RechercheInfoParNom( local sNomNL est une chaine )
+      
+      stInfoMsg est un STInfoMessage
+      
+      HLitRecherchePremier(NLMessage,NomNL,sNomNL)
+      si HTrouve()=faux ALORS
+      	ErreurDéclenche(1,"Message non trouvé")
+      FIN
+      
+      FichierVersMémoire(stInfoMsg,NLMessage)
+      
+      renvoyer stInfoMsg
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer stInfoMsg
+     type : 458752
+   -
+     name : NL_Message_Modifie
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1317703826316445299
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //NL_Message_Modifie (<stInfoNL> est STInfoMessage)
+      //
+      // Paramètres :
+      //	stInfoNL (STInfoMessage) : <indiquez ici le rôle de gstInfoNL>
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_Modifie(LOCAL stInfoNL est un STInfoMessage)
+      
+      HLitRecherchePremier(NLMessage,IDNLMessage,stInfoNL.IDNLMessage,hBlocageEcriture)
+      
+      MémoireVersFichier(stInfoNL,NLMessage)
+      
+      hmodifie(NLMessage)
+      
+      CAS ERREUR:
+      ErreurPropage()
+     type : 458752
+   -
+     name : NL_Message_ChangeTexteBrut
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1317725649070083392
+     type_code : 15
+     code : |1-
+      // Résumé : Modifie le texte brut d'une newsletter
+      // Syntaxe :
+      //NL_Message_ChangeTexteBrut (<nIDML> est entier sur 8 octets, <sTexteBrut> est chaîne)
+      //
+      // Paramètres :
+      //	nIDML (entier sur 8 octets) : Identifiant de la NL
+      //	sTexteBrut (chaîne UNICODE) : Nouveau texte brut
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_ChangeTexteBrut( local nIDML est un entier sur 8, local sTexteBrut est une chaine )
+      
+      HLitRecherchePremier(NLMessage,IDNLMessage,nIDML,hBlocageEcriture)
+      
+      NLMessage.MessageTexte = sTexteBrut
+      
+      hmodifie(NLMessage)
+      
+      CAS ERREUR:
+      	erreurpropage()
+     type : 458752
+   -
+     name : NL_Message_ChargeTexteBrut
+     procedure_id : 1317726263251795685
+     type_code : 15
+     code : |1+
+      // Résumé : Retourne le texte brut d'une newsletter
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_ChargeTexteBrut (<nIDNL> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDNL (entier sur 8 octets) : Identifiant de la NL
+      // Valeur de retour :
+      // 	chaîne UNICODE : Texte brut
+      //
+      PROCEDURE NL_Message_ChargeTexteBrut( local nIDNL est un entier sur 8 ) : chaine
+      
+      HLitRecherchePremier(NLMessage,IDNLMessage,nIDNL)
+      
+      renvoyer NLMessage.MessageTexte
+      
+     type : 458752
+   -
+     name : NL_Message_ChargeListeBloc
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318014098941024769
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_ChargeListeBloc (<nIDML> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDML (entier sur 8 octets) : <indiquez ici le rôle de nIDML>
+      // Valeur de retour :
+      // 	tableau : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_ChargeListeBloc( local nIDML est un entier sur 8 ) : tableau de STBlocHTML
+      
+      tabBloc est un tableau de STBlocHTML
+      bufBloc est un buffer
+      
+      HLitRecherchePremier(NLMessage,IDNLMessage,nIDML)
+      si htrouve(NLMessage)=faux ALORS
+      	ErreurDéclenche(1,"Message non trouve")
+      FIN
+      
+      si NLMessage.MessageblocHTMl="" ALORS
+      	renvoyer tabBloc
+      FIN
+      
+      bufBloc = NLMessage.MessageblocHTML
+      Désérialise(tabBloc,bufBloc,psdBinaire)
+      
+      // Génère les blocs qui ne le seraient pas
+      pour tout stBloc de tabBloc
+      	si stBloc.sHTMLGénéré="" alors
+      		NL_Message_GenereBloc(stBloc)
+      	FIN
+      FIN
+      
+      renvoyer tabBloc
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer tabBloc
+      	
+     type : 458752
+   -
+     name : NL_Message_GenereBloc
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318033297448193246
+     type_code : 15
+     code : |1-
+      // Résumé : Génère le code HTML d'un bloc de message
+      // Syntaxe :
+      //NL_Message_GenereBloc (<stBloc> est STBlocHTML)
+      //
+      // Paramètres :
+      //	stBloc (STBlocHTML) : Bloc à générer
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_GenereBloc( stBloc est un STBlocHTML )
+      
+      selon stBloc.nTypeBloc
+      	CAS BLOC_TEXTE
+      		stBloc.sHTMLGénéré = "<div class=""__nl__text"">"+stBloc.tabTexte[1]+"</div>"
+      	CAS BLOC_TEXTE_CADRE
+      		stBloc.sHTMLGénéré = "<div class=""__nl__textborder"">"+stBloc.tabTexte[1]+"</div>"
+      	CAS BLOC_SEPARATEUR
+      		stBloc.sHTMLGénéré = "<hr class=""__nl__hr"" />"
+      	CAS BLOC_IMAGE
+      		stBloc.sHTMLGénéré = "<div class=""__nl__image""><img src="""+NL_GenereURLAttach(stBloc.tabImage[1].nIDAttache,stBloc.tabImage[1].nLargeur,stBloc.tabImage[1].nHauteur,"")+""" /></div>"
+      	CAS BLOC_GROUPE_IMAGE
+      		stBloc.sHTMLGénéré = "<div class=""__nl__groupimage""><table class=""__nl__tablegroupimage"">"
+      		nMaxLigne est un entier = stBloc.tabImage..Occurrence/stBloc.nTailleLigne
+      		si (stBloc.tabImage..Occurrence modulo stBloc.nTailleLigne)<>0 alors nMaxLigne++
+      		pour nLigne=0 _a_ nMaxLigne-1
+      			stBloc.sHTMLGénéré += "<tr>"
+      			pour nImg=1 _a_ stBloc.nTailleLigne
+      				nIndice est un entier = (nLigne*stBloc.nTailleLigne)+nImg
+      				si nIndice>stBloc.tabImage..Occurrence alors sortir
+      				stBloc.sHTMLGénéré += "<td class=""__nl__cellgroupimage""><img src="""+NL_GenereURLAttach(stBloc.tabImage[nIndice].nIDAttache,stBloc.tabImage[nIndice].nLargeur,stBloc.tabImage[nIndice].nHauteur,"")+""" width="""+stBloc.tabImage[nIndice].nLargeur+""" height="""+stBloc.tabImage[nIndice].nHauteur+""" class=""__nl__imagegroup""/><br />"+stBloc.tabTexte[nIndice]+"</td>"
+      			FIN			
+      			stBloc.sHTMLGénéré += "</tr>"			
+      		FIN
+      		stBloc.sHTMLGénéré += "</table></div>"
+      	CAS BLOC_IMAGE_LIB
+      		stBloc.sHTMLGénéré = "<div><table class=""__nl__tableimagelib""><tr>"
+      		stBloc.sHTMLGénéré += "<td class=""__nl__cellimagelib""><img src="""+NL_GenereURLAttach(stBloc.tabImage[1].nIDAttache,stBloc.tabImage[1].nLargeur,stBloc.tabImage[1].nHauteur,"")+""" width="""+stBloc.tabImage[1].nLargeur+""" height="""+stBloc.tabImage[1].nHauteur+""" class=""__nl__imagelib""/></td>"
+      		stBloc.sHTMLGénéré += "<td class=""__nl__cellimagelib"">"+stBloc.tabTexte[1]+"</td>"
+      		stBloc.sHTMLGénéré += "</tr></table></div>"
+      	CAS BLOC_LIEN_SOCIAUX
+      		stBloc.sHTMLGénéré = "<div class=""__nl__social"">"
+      		pour nSoc=1 _a_ stBloc.tabLien..Occurrence
+      			si stBloc.tabLien[nSoc]<>"" alors
+      				sURL est une chaine = ChaîneConstruit(gtabLienSocialDefaut[nSoc],stBloc.tabLien[nSoc])
+      				stBloc.sHTMLGénéré += "<a href="""+sURL+""">"
+      				stBloc.sHTMLGénéré += "<img src="""+NL_GenereURLAttach(stBloc.tabImage[nSoc].nIDAttache,stBloc.tabImage[nSoc].nLargeur,stBloc.tabImage[nSoc].nHauteur,"")+""" title="""+stBloc.tabTexte[nSoc]+""" alt="""+stBloc.tabTexte[nSoc]+""" width=""48"" height=""48"">"
+      				stBloc.sHTMLGénéré += "</a>"
+      			fin
+      		fin
+      		stBloc.sHTMLGénéré += "</div>"
+      	CAS BLOC_BOUTON
+      		stBloc.sHTMLGénéré = "<div class=""__nl__blocbtn"">"+stBloc.tabTexte[1]+"<div class=""__nl__groupbtn"">"
+      		pour nBtn=1 _a_ stBloc.tabLien..Occurrence
+      			stBloc.sHTMLGénéré += "<a href="""+stBloc.tabLien[nBtn]+""">"
+      			stBloc.sHTMLGénéré += "<input type=""button"" value="""+stBloc.tabTexte[nBtn+1]+""" class=""__nl__btn"" onClick="" ""/>"
+      			stBloc.sHTMLGénéré += "</a>"
+      		fin
+      		stBloc.sHTMLGénéré += "</div></div>"
+      	CAS BLOC_FOOTER_AUTO
+      		stBloc.sHTMLGénéré = "<div class=""__nl__footerauto""><hr class=""__nl__hr"" />"+stBloc.tabTexte[1]+"</div>"
+      	CAS BLOC_HEADER_AUTO
+      		stBloc.sHTMLGénéré = "<div class=""__nl__headerauto"">"+stBloc.tabTexte[1]+"</div>"
+      FIN
+      
+      stBloc.sHTMLGénéré = Remplace(stBloc.sHTMLGénéré,RC,"<br />")
+      
+      sUneLigne est une chaîne
+      sUneLigneTemp est une chaîne
+      sRetour est une chaîne
+      POUR TOUTE CHAÎNE sUneLigne DE stBloc.sHTMLGénéré SEPAREE PAR RC
+      	SI Taille(sUneLigne) > 500 ALORS
+      		sUneLigneTemp = sUneLigne
+      		sRetour += [RC] + Remplace(sUneLigne, "<", RC + "<")
+      	SINON
+      		sRetour += [RC] + sUneLigne
+      	FIN
+      FIN
+      
+      stBloc.sHTMLGénéré = sRetour
+      
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+     type : 458752
+   -
+     name : NL_Message_ChangeListeBloc
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318035573790696894
+     type_code : 15
+     code : |1-
+      // Résumé : Met à jour la liste des blocs HTML dans un message
+      // Syntaxe :
+      //NL_Message_ChangeListeBloc (<nIDMessage> est entier sur 8 octets, <tabBloc> est tableau)
+      //
+      // Paramètres :
+      //	nIDMessage (entier sur 8 octets) : Identifiant du message
+      //	tabBloc (tableau) : Tableau de blocs
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_ChangeListeBloc( local nIDMessage est un entier sur 8, local tabBloc est un tableau de STBlocHTML)
+      
+      HLitRecherchePremier(NLMessage,IDNLMessage,nIDMessage,hBlocageEcriture)
+      si HTrouve(NLMessage)=faux ALORS
+      	ErreurDéclenche(1,"Message non trouvé")
+      	retour
+      FIN
+      
+      bufBloc est un buffer
+      Sérialise(tabBloc,bufBloc,psdBinaire)
+      NLMessage.MessageBlocHTML = bufBloc
+      
+      hmodifie(NLMessage)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	
+     type : 458752
+   -
+     name : NL_Message_Programme
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318053449489101581
+     type_code : 15
+     code : |1+
+      // Résumé : Programme un message
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_Programme (<nIDNLMessage> est entier sur 8 octets, <dhDateHeureEnvoi> est dateheure)
+      //
+      // Paramètres :
+      //	nIDNLMessage (entier sur 8 octets) : L'identifiant du NLMessage
+      //	dhDateHeureEnvoi (dateheure) : La date et heure d'envoi
+      // Valeur de retour :
+      // 	booléen : Vrai si la programmation s'est bien passée, faux sinon
+      
+      // Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_Programme(local nIDNLMessage est un entier sur 8, local dhDateHeureEnvoi est un dateheure)
+      
+      hlitrecherchepremier(NLMessage,IDNLMessage,nIDNLMessage)
+      
+      NLMessage.EtatNL = ETAT_PROGRAMME
+      NLMessage.DateHeureEnvoi = dhDateHeureEnvoi
+      
+      HModifie(NLMessage)
+      
+      renvoyer vrai
+      
+      CAS ERREUR:	
+      	erreurpropage()
+      	renvoyer faux
+     type : 458752
+   -
+     name : NL_GénèreElémentsFile
+     internal_properties : CAAAAAgAAABgu+0KjoGHN9guUrUBFGl2yJsHpXsTAD+uNLzCgFxhYOtxmqgxbcUcXzgeEOmjIPNbKoQIgvdimHSfuypt7/wxgPhJgz6KpRqcqoRKLrrTtAJVQcSTw7TR7QULou9wGAFz4k3GlwiOuOlKIhI/d0LnZH4pHzRiQHgeUQ6zgCdO4GrSaQ4=
+     procedure_id : 1318064947116608775
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //NL_GénèreElémentsFile (<nIDNLMessage> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDNLMessage (entier sur 8 octets) : <indiquez ici le rôle de nIDNLMessage>
+      // Valeur de retour :
+      // 	Aucune
+      //
+      // Exemple :
+      // Indiquez ici un exemple d'utilisation.
+      //
+      PROCEDURE NL_GénèreElémentsFile(local nIDNLMessage est un entier sur 8)
+      
+      clEmail est un email
+      tabUtilisateurs est un tableau de STInfoUtilisateur
+      
+      // Recherche la newsletter
+      HLitRecherchePremier(NLMessage,IDNLMessage,nIDNLMessage)
+      SI HTrouve(NLMessage) = Faux ALORS
+      	NL_Log_Ajoute(ChaîneConstruit("Echec de la lecture de la NL %1,",nIDNLMessage),LOG_ERREUR)
+      	retour
+      FIN
+      
+      
+      // Récupération des utilisateurs
+      tabUtilisateurs = NL_Liste_LitUtilisateur(NLMessage.IDNLListe)
+      stUnUtilisateur est un STInfoUtilisateur
+      
+      // Notification de début de mailing
+      NL_Message_Notification(nIDNLMessage,"Début de l'envoi de la newsletter")
+      nSeuilPourcentage est un entier = (tabUtilisateurs..Occurrence/10)+1
+      
+      pour i = 1 _a_ tabUtilisateurs..Occurrence
+      	
+      	// Génère le mail
+      	stUnUtilisateur = NL_Utilisateur_LitInfo(tabUtilisateurs[i].IDNLUtilisateur)
+      	
+      	// on est positionné sur le NLMessage
+      	clEmail = NL_Message_GénèreUnMail(stUnUtilisateur)
+      	
+      	// On ajoute le message à envoyer
+      	COL_NLEMAIL.NL_EMail_AjouteMessageAEnvoyer(clEmail,nlmessage.IDNLListe,nlmessage.IDNLMessage,stUnUtilisateur.IDNLUtilisateur)
+      	si ErreurDétectée ALORS
+      		NL_Log_Ajoute(ChaîneConstruit("Echec de la construction d'un mail pour l'utilisateur %1",stUnUtilisateur.IDNLUtilisateur),LOG_ERREUR)
+      	FIN
+      	
+      	// Notification tous les 10%
+      	si (i modulo nSeuilPourcentage)=0 ALORS
+      		NL_Message_Notification(nIDNLMessage,ChaîneConstruit("Envoi de la newsletter en cours : %1 %%",(10*i)/nSeuilPourcentage))
+      	FIN
+      FIN
+      
+      NL_Message_Notification(nIDNLMessage,"Fin de l'envoi de la newsletter")
+     type : 458752
+   -
+     name : NL_Message_GénèreUnMail
+     procedure_id : 1318068125392492664
+     type_code : 15
+     code : |1-
+      // Résumé : cette procédure permet de générer un email (NOTE : Cette procédure considère qu'on est positionné sur le bon enregistrement de NLMessage)
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_GénèreUnMail (<stUnUtilisateur> est STInfoUtilisateur)
+      //
+      // Paramètres :
+      //	stUnUtilisateur (STInfoUtilisateur) : Les infos de l'utilisateur
+      // Valeur de retour :
+      // 	Email : // 	Aucune
+      //
+      
+      PROCEDURE NL_Message_GénèreUnMail(stUnUtilisateur est un STInfoUtilisateur)
+      
+      
+      clEmail est un email
+      
+      clEmail.Sujet = NL_Message_FusionneAttributs(NLMessage.Sujet,stUnUtilisateur,NLMessage.IDNLMessage,NLMessage.IDNLListe)
+      clEmail.Message = NL_Message_FusionneAttributs(NLMessage.MessageTexte,stUnUtilisateur,NLMessage.IDNLMessage,NLMessage.IDNLListe)
+      clEmail.AdresseExpéditeur = NLMessage.AdresseExpediteur
+      // Vérifie que le format du destinataire contient au minimum la balise EMAIL, sinon, le remplace par l'email simple
+      si position(NLMessage.FormatDestinataire,PREFIXE_ATTR+ATTR_EMAIL+SUFFIXE_ATTR)>0 alors
+      	ajoute(clEmail.Destinataire,NL_Message_FusionneAttributs(NLMessage.FormatDestinataire,stUnUtilisateur,NLMessage.IDNLMessage,NLMessage.IDNLListe))
+      sinon
+      	ajoute(clEmail.Destinataire,stUnUtilisateur.Email)
+      fin
+      clEmail.Expediteur = nlMessage.AdresseExpediteur
+      
+      // Construction du HTML en fusionnant les attributs pour chaque bloc du message
+      sSourceHTML est une chaine
+      tabBloc est un tableau de STBlocHTML = NL_Message_ChargeListeBloc(NLMessage.IDNLMessage)
+      si tabBloc..Occurrence>0 alors
+      	sSourceHTML = NL_Message_HTMLDebut(clEmail.Sujet)
+      	pour tout stBloc de tabBloc
+      		sSourceHTML += NL_Message_FusionneAttributs(stBloc.sHTMLGénéré,stUnUtilisateur,NLMessage.IDNLMessage,NLMessage.IDNLListe)
+      	fin
+      	sSourceHTML += NL_Message_HTMLFin()
+      fin
+      clEmail.html = ChaîneVersUTF8(sSourceHTML)
+      	
+      // Recherche des pièces jointes
+      clAttache est un EmailAttache
+      
+      // Recherche les pièces jointes éventuelles
+      pour TOUT NLMessage_NLAttache avec IDNLMessage = nlmessage.IDNLMessage
+      	
+      	hlitrecherchepremier(NLAttache,IDNLAttache,NLMessage_NLAttache.IDNLAttache)
+      	dbgassertion(htrouve(NLAttache))
+      	
+      	// Construction de la pièce jointe	
+      	clAttache.ContentDescription = NLAttache.Description
+      	clAttache.Contenu = NLAttache.contenu
+      	clAttache.Nom = NLAttache.nom
+      	clAttache.ContentType = NLAttache.type
+      	
+      	// on utilise le Hash pour identifier la pièce jointe pour éviter les mélanges de pièces jointes sur les mobiles.
+      	// Sur les mobiles, si l'identifiant de la pièce jointe ne change pas, elle n'est pas re-téléchargée.
+      	clAttache.Identifiant = NLAttache.hash
+      	
+      	ajoute(clEmail.Attache,clAttache)	
+      FIN
+      
+      renvoyer clEmail
+     type : 458752
+   -
+     name : NL_Message_FusionneAttributs
+     procedure_id : 1318077471244815429
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_FusionneAttributs (<sTexteFusion> est chaîne, <stUnUtilisateur> est STInfoUtilisateur, <nIDNLMessage> est entier sur 8 octets, <nIDNLListe> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	sTexteFusion (chaîne UNICODE) : <indiquez ici le rôle de sTexte>
+      //	stUnUtilisateur (STInfoUtilisateur) : <indiquez ici le rôle de stUnUtilisateur>
+      //	nIDNLMessage (entier sur 8 octets) : <indiquez ici le rôle de stInfoMessage>
+      //	nIDNLListe (entier sur 8 octets) : <indiquez ici le rôle de nIDNLListe>
+      // Valeur de retour :
+      // 	Type indéterminé : // 	Aucune
+      //
+      // Exemple :
+      // Indiquez ici un exemple d'utilisation.
+      //
+      PROCEDURE NL_Message_FusionneAttributs(LOCAL sTexteFusion est une chaine,local stUnUtilisateur est un STInfoUtilisateur,local nIDNLMessage est un entier sur 8, local nIDNLListe est un entier sur 8)
+      
+      sTexteFusionOriginal est une chaine = sTexteFusion
+      
+      // Remplacement des paramètres globaux
+      taParam est un tableau associatif de chaines = NL_ListeParamMessage()
+      pour tout sVal,sCle de taParam
+      	sTexteFusion = remplace(sTexteFusion,PREFIXE_ATTR+scle+SUFFIXE_ATTR,sVal)
+      FIN
+      
+      // Remplacement des attributs de la liste
+      taAttrListe est un tableau associatif de chaines = NL_Liste_ListeAttribut(nIDNLListe)
+      POUR TOUT sVal,sCle de taAttrListe
+      	sTexteFusion = Remplace(sTexteFusion,PREFIXE_ATTR+sCle+SUFFIXE_ATTR,sVal)
+      FIN
+      
+      // Remplacement des attributs de la newsletter
+      taAttrNL est un tableau associatif de chaines = NL_Message_ListeAttribut(nIDNLMessage)
+      POUR TOUT sVal,sCle de taAttrNL
+      	sTexteFusion = Remplace(sTexteFusion,PREFIXE_ATTR+sCle+SUFFIXE_ATTR,sVal)
+      FIN
+      
+      // Remplacement des attributs de l'utilisateur
+      taAttr est un tableau associatif de chaines = NL_Utilisateur_ListeAttribut(stUnUtilisateur.Email,nIDNLListe)
+      POUR TOUT sVal,sCle de taAttr
+      	sTexteFusion = Remplace(sTexteFusion,PREFIXE_ATTR+sCle+SUFFIXE_ATTR,sVal)
+      FIN
+      
+      si sTexteFusion = sTexteFusionOriginal ALORS
+      	// Pas eu de modifs
+      	// On renvoie la chaîne
+      	renvoyer sTexteFusion
+      sinon
+      	// On se rappelle (pour avoir la possibilité de faire des attributs construits (type : NOMPRENOM = CIV NOM PRENOM)
+      	renvoyer NL_Message_FusionneAttributs(sTexteFusion,stUnUtilisateur,nIDNLMessage,nIDNLListe)
+      FIN
+     type : 458752
+   -
+     name : NL_Message_ListeModele
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1319198689650617713
+     type_code : 15
+     code : |1-
+      // Résumé : Liste les modèles de newsletters
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_ListeModele ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	tableau : Tableau des messages correspondants
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_ListeModele( )
+      
+      tabMdl est un tableau de STInfoMessage
+      tabMdlVide est un tableau de STInfoMessage
+      
+      pour TOUT NLMessage AVEC EstModèle = vrai
+      	stMsg est un STInfoMessage
+      	FichierVersMémoire(stMsg,NLMessage)
+      	HLitRecherchePremier(NLListe,IDNLListe,stMsg.IDNLListe)
+      	stMsg.sNomListe = NLListe.Nom
+      	ajoute(tabMdl,stMsg)
+      FIN
+      
+      renvoyer tabMdl
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer tabMdlVide
+     type : 458752
+   -
+     name : NL_Message_Supprime
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1319205961034957575
+     type_code : 15
+     code : |1-
+      // Résumé : Supprime une newsletter
+      // Syntaxe :
+      //NL_Message_Supprime (<nIDNL> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDNL (entier sur 8 octets) : Identifiant
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_Supprime( local nIDNL est un entier sur 8 )
+      
+      HLitRecherchePremier(NLMessage,IDNLMessage,nIDNL,hBlocageLectureEcriture)
+      HSupprime(NLMessage)
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	
+     type : 458752
+   -
+     name : NL_Message_InitBloc
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1319257281776539614
+     type_code : 15
+     code : |1+
+      // Résumé : Initialise un bloc avec des valeurs par défaut
+      // Syntaxe :
+      //NL_Message_InitBloc (<stBloc> est STBlocHTML)
+      //
+      // Paramètres :
+      //	stBloc (STBlocHTML) : <indiquez ici le rôle de stBloc>
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_InitBloc(stBloc est un STBlocHTML )
+      
+      stImgDefaut est un STInfoImage
+      stImgDefaut.nIDAttache = 0
+      stImgDefaut.nLargeur = 100
+      stImgDefaut.nHauteur = 50
+      
+      SELON stBloc.nTypeBloc
+      	cas BLOC_TEXTE
+      		ajoute(stBloc.tabTexte,"Saisissez ici votre texte")
+      	cas BLOC_TEXTE_CADRE
+      		Ajoute(stBloc.tabTexte,"Saisissez ici votre texte")
+      	cas BLOC_SEPARATEUR
+      	cas BLOC_IMAGE
+      		Ajoute(stBloc.tabImage,stImgDefaut)
+      	cas BLOC_GROUPE_IMAGE
+      		stBloc.nTailleLigne = 3
+      		Ajoute(stBloc.tabImage,stImgDefaut)
+      		Ajoute(stBloc.tabTexte,"Saisissez ici votre texte")
+      	cas BLOC_IMAGE_LIB
+      		Ajoute(stBloc.tabImage,stImgDefaut)
+      		Ajoute(stBloc.tabTexte,"Saisissez ici votre texte")
+      	cas BLOC_LIEN_SOCIAUX
+      		Ajoute(stBloc.tabTexte,"Suivez nous sur Facebook")
+      		Ajoute(stBloc.tabTexte,"Suivez nous sur Twitter")
+      		Ajoute(stBloc.tabTexte,"Suivez nous sur Google Plus")
+      		Ajoute(stBloc.tabLien,ChaîneConstruit(LIEN_DEFAUT_FACEBOOK,PREFIXE_ATTR,SUFFIXE_ATTR))
+      		Ajoute(stBloc.tabLien,ChaîneConstruit(LIEN_DEFAUT_TWITTER,PREFIXE_ATTR,SUFFIXE_ATTR))
+      		Ajoute(stBloc.tabLien,ChaîneConstruit(LIEN_DEFAUT_GOOGLE_PLUS,PREFIXE_ATTR,SUFFIXE_ATTR))
+      		stImgLogo est un STInfoImage
+      		stImgLogo.nLargeur = 80
+      		stImgLogo.nHauteur = 80
+      		stImgLogo.nIDAttache = NL_Attache_TrouveIDParNom(ATTACHE_NOM_ID_FACEBOOK)
+      		Ajoute(stBloc.tabImage,stImgLogo)
+      		stImgLogo.nIDAttache = NL_Attache_TrouveIDParNom(ATTACHE_NOM_ID_TWITTER)
+      		Ajoute(stBloc.tabImage,stImgLogo)
+      		stImgLogo.nIDAttache = NL_Attache_TrouveIDParNom(ATTACHE_NOM_ID_GOOGLE_PLUS)
+      		Ajoute(stBloc.tabImage,stImgLogo)
+      	cas BLOC_BOUTON
+      		Ajoute(stBloc.tabTexte,"Choix 1")
+      		Ajoute(stBloc.tabTexte,"Choix 2")
+      		Ajoute(stBloc.tabLien,ChaîneConstruit("%1URL_PUBLIQUE%2",PREFIXE_ATTR,SUFFIXE_ATTR))
+      		Ajoute(stBloc.tabLien,ChaîneConstruit("%1URL_PUBLIQUE%2",PREFIXE_ATTR,SUFFIXE_ATTR))
+      	cas BLOC_FOOTER_AUTO
+      		ajoute(stBloc.tabTexte,ChaîneConstruit("Si vous souhaitez vous désabonner des newsletters %1NOM_SITE%2, rendez-vous sur <a href=""%1URL_PAGE_DESINSCRIPTION%2"">ce lien</a>.",PREFIXE_ATTR,SUFFIXE_ATTR))
+      	cas BLOC_HEADER_AUTO
+      		ajoute(stBloc.tabTexte,ChaîneConstruit("Newsletter du site %1NOM_SITE%2",PREFIXE_ATTR,SUFFIXE_ATTR))
+      		ajoute(stBloc.tabLien,ChaîneConstruit("%1URL_AFFICHENL%2",PREFIXE_ATTR,SUFFIXE_ATTR))
+      FIN
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      
+     type : 458752
+   -
+     name : NL_Message_NbMessageEtat
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1321737135527206696
+     type_code : 15
+     code : |1-
+      // Résumé : Compte le nombre de messages dans un état donné
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_NbMessageEtat (<nEtat> est entier)
+      //
+      // Paramètres :
+      //	nEtat (entier) : Etat recherché
+      // Valeur de retour :
+      // 	Type indéterminé : Nombre de mails
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_NbMessageEtat( local nEtat est un entier )
+      
+      HExécuteRequête(REQ_CompteMessageEnEtat,hRequêteDéfaut,nEtat)
+      
+      renvoyer REQ_CompteMessageEnEtat.Comptage
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer 0
+     type : 458752
+   -
+     name : NL_Message_Notification
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1356994290128653008
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //NL_Message_Notification (<nIDNLMessage> est entier sur 8 octets, <sMessageNotif> est chaîne)
+      //
+      // Paramètres :
+      //	nIDNLMessage (entier sur 8 octets) : <indiquez ici le rôle de nIDNLMessage>
+      //	sMessageNotif (chaîne UNICODE) : <indiquez ici le rôle de sMessageNotif>
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_Notification(LOCAL nIDNLMessage est un entier sur 8, local sMessageNotif est une chaine)
+      
+      stInfo est un STInfoMessage = NL_Message_RechercheInfoParID(nIDNLMessage)
+      si stInfo.AdresseNotification="" alors retour
+      
+      cMel est un Email
+      cMel.Expediteur = NL_LitParam(PARAM_EMAIL_EXPEDITEUR)
+      cMel.Destinataire[1] = stInfo.AdresseNotification
+      cMel.Sujet = ChaîneConstruit("[NOTIF] %1 : "+sMessageNotif,NL_LitParam(PARAM_NOM_SITE,Faux,"WW_Newsletter"))
+      cMel.Message = ChaîneConstruit([
+      	Bonjour,
+      	
+      	Je suis l'automate de gestion des newsletters de %1
+      	Ceci est un message de notification de la newsletter %3.
+      	
+      	%2
+      	
+      	Cordialement.
+      ],NL_LitParam(PARAM_NOM_SITE),sMessageNotif,stInfo.NomNL)
+      
+      NL_EMail_AjouteMessageAEnvoyer(cMel,MAIL_SANS_LISTE,MAIL_SANS_MESSAGE,MAIL_SANS_UTILISATEUR,MAIL_PRIORITE_NORMALE)
+      
+      CAS ERREUR:
+      ErreurPropage()
+     type : 458752
+   -
+     name : NL_Message_FeuilleCSS
+     procedure_id : 1358134230428437496
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_FeuilleCSS ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	chaîne UNICODE : // 	Aucune
+      //
+      PROCEDURE NL_Message_FeuilleCSS()
+      
+      renvoyer  [
+      <style type=text/css>
+      
+      /* Styles communs */
+      html {
+      font-family: sans-serif;
+      }
+      
+      body {
+      margin: 0;
+      font-size: 1em;
+      line-height: 1.4;
+      color: #222;
+      }
+      
+      a {
+      background: transparent;
+      }
+      
+      a:focus {
+      outline: thin dotted;
+      }
+      
+      a:active,
+      a:hover {
+      outline: 0;
+      }
+      
+      hr {
+      }
+      
+      table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      } .__nl__main {
+      width: 640px;
+      margin-left: auto;
+      margin-right: auto;
+      background-color: #eee;
+      padding: 10px;
+      } .__nl__headerauto {
+      font-size: 7pt;
+      text-align: center;
+      padding: 5px;
+      } .__nl__text {
+      color: #555;
+      padding: 10px;
+      } .__nl__textborder {
+      width: 560px;
+      border-width: 2px;
+      border-color: #000;
+      border-style: solid;
+      border-radius: 10px / 10px;
+      margin-left: auto;
+      margin-right: auto;
+      color: #555;
+      padding: 10px;
+      } .__nl__hr {
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 20px;
+      display: block;
+      height: 1px;
+      border: 0;
+      border-top: 1px solid #ccc;
+      padding: 0;
+      } .__nl__image {
+      margin-left:auto;
+      margin-right:auto;
+      padding: 10px;
+      } .__nl__image img {
+      margin-left: auto;
+      margin-right: auto;
+      border-width: 2px;
+      border-color: #000;
+      border-style: solid;
+      border-radius: 10px / 10px;
+      display:block;
+      } .__nl__groupimage {
+      padding: 10px;
+      } .__nl__tablegroupimage {
+      margin-left:auto;
+      margin-right:auto;
+      text-align: center;
+      } .__nl__imagegroup {
+      margin: 20px;
+      border-width: 2px;
+      border-color: #000;
+      border-style: solid;
+      border-radius: 10px / 10px;
+      } .__nl__cellgroupimage {
+      font-size: 9pt;
+      } .__nl__imagelib {
+      border-width: 2px;
+      border-color: #000;
+      border-style: solid;
+      border-radius: 10px / 10px;
+      } .__nl__cellimagelib {
+      padding: 20px;
+      font-size: 11pt;
+      } .__nl__social {
+      text-align: right;
+      vertical-align: bottom;
+      margin: 20px;
+      } .__nl__blocbtn {
+      margin: 20px;
+      } .__nl__groupbtn {
+      padding: 20px;
+      margin-left: 5%;
+      margin-right: 5%;
+      } .__nl__btn {
+      margin-left: 5%;
+      margin-right: 5%;
+      width: 35%;
+      } .__nl__footerauto {
+      font-size: 7pt;
+      text-align: center;
+      padding: 5px;
+      }
+      </style>
+      ]
+     type : 458752
+   -
+     name : NL_Message_HTMLDebut
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1358138662861605110
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_HTMLDebut (<sSujet> est chaîne)
+      //
+      // Paramètres :
+      //	sSujet (chaîne UNICODE) : <indiquez ici le rôle de sSujet>
+      // Valeur de retour :
+      // 	Type indéterminé : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_HTMLDebut( local sSujet est une chaine )
+      
+      renvoyer ChaîneConstruit([
+      <!DOCTYPE html>
+      <html>
+      <head>
+      <meta charset="utf-8">
+      %2
+      <title>%1</title>
+      </head>
+      <body>
+      <div class="__nl__main">
+      ],sSujet,NL_Message_FeuilleCSS())
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer ""
+     type : 458752
+   -
+     name : NL_Message_HTMLFin
+     procedure_id : 1358139057998688357
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_HTMLFin ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	chaîne UNICODE : // 	Aucune
+      //
+      PROCEDURE NL_Message_HTMLFin()
+      
+      renvoyer [
+      </div>
+      </body>
+      </html>
+      ]
+     type : 458752
+   -
+     name : NL_Message_ListeAttribut
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1358207318067115590
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_ListeAttribut (<nIDNL> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDNL (entier sur 8 octets) : <indiquez ici le rôle de nIDNL>
+      // Valeur de retour :
+      // 	tableau associatif : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_ListeAttribut( local nIDNL est un entier sur 8<utile> )
+      
+      taAttr est un tableau associatif de chaines
+      
+      HLitRecherchePremier(NLMessage,IDNLMessage,nIDNL)
+      SI HTrouve(NLMessage)=Faux ALORS
+      	ErreurDéclenche(1,"Message non trouvé")
+      	renvoyer taAttr
+      FIN
+      
+      taAttr["ID_FACEBOOK"] = NLMessage.CompteFacebook
+      taAttr["ID_TWITTER"] = NLMessage.CompteTwitter
+      taAttr["ID_GOOGLE_PLUS"] = NLMessage.CompteGooglePlus
+      
+      renvoyer taAttr
+      
+      CAS ERREUR:
+      	erreurpropage()
+      	renvoyer taAttr
+     type : 458752
+   -
+     name : NL_Message_InitBlocDefaut
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1362686582450994288
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_InitBlocDefaut ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	tableau : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_InitBlocDefaut() : tableau de STBlocHTML
+      
+      tabBloc est un tableau de STBlocHTML
+      
+      // Entête
+      stBlocEntete est un STBlocHTML
+      stBlocEntete.nTypeBloc = BLOC_HEADER_AUTO
+      NL_Message_InitBloc(stBlocEntete)
+      NL_Message_GenereBloc(stBlocEntete)
+      ajoute(tabBloc,stBlocEntete)
+      
+      // Texte
+      stBlocTexte est un STBlocHTML
+      stBlocTexte.nTypeBloc = BLOC_TEXTE
+      NL_Message_InitBloc(stBlocTexte)
+      NL_Message_GenereBloc(stBlocTexte)
+      Ajoute(tabBloc,stBlocTexte)
+      
+      // Footer
+      stBlocFooter est un STBlocHTML
+      stBlocFooter.nTypeBloc = BLOC_FOOTER_AUTO
+      NL_Message_InitBloc(stBlocFooter)
+      NL_Message_GenereBloc(stBlocFooter)
+      Ajoute(tabBloc,stBlocFooter)
+      
+      RENVOYER tabBloc
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	SupprimeTout(tabBloc)
+      	renvoyer tabBloc
+     type : 458752
+   -
+     name : NL_Message_ProchainEnvoi
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1363041891899019096
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_ProchainEnvoi ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	dateheure : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_ProchainEnvoi() : dateheure
+      
+      HExécuteRequête(REQ_ProchainePlanification)
+      
+      renvoyer REQ_ProchainePlanification.DateHeureEnvoi
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer ""
+     type : 458752
+   -
+     name : NL_Message_AnnuleProgramme
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1363058195618332074
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Message_AnnuleProgramme (<nIDNLMessage> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDNLMessage (entier sur 8 octets) : <indiquez ici le rôle de nIDNLMessage>
+      // Valeur de retour :
+      // 	booléen : // 	Aucune
+      //
+      //	dhDateHeureEnvoi (dateheure) : <indiquez ici le rôle de dhDateHeureEnvoi>// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Message_AnnuleProgramme(LOCAL nIDNLMessage est un entier sur 8)
+      
+      HLitRecherchePremier(NLMessage,IDNLMessage,nIDNLMessage)
+      
+      NLMessage.EtatNL = ETAT_BROUILLON
+      NLMessage.DateHeureEnvoi = ""
+      HModifie(NLMessage)
+      
+      RENVOYER Vrai
+      
+      CAS ERREUR:	
+      ErreurPropage()
+      RENVOYER Faux
+     type : 458752
+   -
+     name : NL_Message_EnvoyerEnTest
+     procedure_id : 1400793121098793749
+     type_code : 15
+     code : |1+
+      // Résumé : Envoie une newsletter aux adresses email de test
+      // Syntaxe :
+      //NL_Message_EnvoyerEnTest (<nIDNLMessage> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDNLMessage (entier sur 8 octets) : Identifiant de la NL
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE NL_Message_EnvoyerEnTest(LOCAL nIDNLMessage est un entier sur 8)
+      
+      clEmail est un email
+      tabUtilisateurs est un tableau de STInfoUtilisateur = NL_Utilisateur_RechercheParAttribut(ATTR_ADRTEST,Vrai)
+      
+      // Recherche la newsletter
+      HLitRecherchePremier(NLMessage,IDNLMessage,nIDNLMessage)
+      SI HTrouve(NLMessage) = Faux ALORS
+      	NL_Log_Ajoute(ChaîneConstruit("Echec de la lecture de la NL %1,",nIDNLMessage),LOG_ERREUR)
+      	RETOUR
+      FIN
+      
+      
+      // Récupération des utilisateurs
+      stUnUtilisateur est un STInfoUtilisateur
+      
+      POUR i = 1 _a_ tabUtilisateurs..Occurrence
+      
+      	// Génère le mail
+      	stUnUtilisateur = NL_Utilisateur_LitInfo(tabUtilisateurs[i].IDNLUtilisateur)
+      	
+      	// on est positionné sur le NLMessage
+      	clEmail = NL_Message_GénèreUnMail(stUnUtilisateur)
+      	
+      	// On ajoute le message à envoyer
+      	COL_NLEMAIL.NL_EMail_AjouteMessageAEnvoyer(clEmail,NLMessage.IDNLListe,NLMessage.IDNLMessage,stUnUtilisateur.IDNLUtilisateur)
+      	SI ErreurDétectée ALORS
+      		NL_Log_Ajoute(ChaîneConstruit("Echec de la construction d'un mail pour l'utilisateur %1",stUnUtilisateur.IDNLUtilisateur),LOG_ERREUR)
+      	FIN
+      FIN
+      
+      
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x1fc51464502dd287
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

@@ -1,0 +1,200 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : COL_OUTILS
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x11e7e1ba000a4f78
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1+
+      constant
+      	TAILLE_CLE_CONFIRMATION = 10
+      	TAILLE_MOT_DE_PASSE = 12
+      	PARAM_DOUBLE_OPT_IN = "DOUBLE_OPT_IN"
+      	PARAM_NOM_SITE = "NOM_SITE"
+      	PARAM_SMTP_SERVEUR = "SMTP_SERVEUR"
+      	PARAM_SMTP_PORT = "SMTP_PORT"
+      	PARAM_SMTP_NOM = "SMTP_NOM"
+      	PARAM_SMTP_PASSE = "SMTP_PASSE"
+      	PARAM_SMTP_TLS = "SMTP_TLS"
+      	PARAM_EMAIL_EXPEDITEUR = "EMAIL_EXPEDITEUR"
+      	PARAM_URL_PUBLIQUE = "URL_PUBLIQUE"
+      	PARAM_URL_PAGE_PROFIL = "URL_PAGE_PROFIL"
+      	PARAM_URL_PAGE_IDENTIFICATION = "URL_PAGE_IDENTIFICATION"
+      	PARAM_URL_PAGE_CONFIRMATION = "URL_PAGE_CONFIRMATION"
+      	PARAM_URL_PAGE_REINITIALISATION = "URL_PAGE_REINITIALISATION"
+      	PARAM_URL_PAGE_DESINSCRIPTION = "URL_PAGE_DESINSCRIPTION"
+      	PARAM_ENVOI_ACTIF = "ENVOI_ACTIF"
+      	IGNORE_DOUBLE_OPTIN = 1
+      	
+      	PARAM_INEXISTANT = "__INEXISTANT__"
+      
+      	// Paramètres d'envoi
+      	PARAM_NB_MAILS_PASSAGE 	= "NB_MAILS_PASSAGE"		// Nombre de mails à envoyer par passage
+      	PARAM_NB_ESSAIS_MAIL	= "NB_ESSAIS_MAILS"		// Nombre d'essais pour envoyer un mail
+      	PARAM_TEMPS_ENTRE_ESSAI	= "TEMPS_ENTRE_ESSAI"	// Temporisation entre 2 essais (en secondes)
+      	
+      	ALGO_HASH = HA_SHA_160
+      	
+      fin
+      
+      gtaParam est un tableau associatif de chaînes
+     type : 720896
+  procedures :
+   -
+     name : NL_LitParam
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315069984773332977
+     type_code : 15
+     code : |1-
+      // Résumé : Lit un paramètre de la configuration globale du site
+      // Syntaxe :
+      //[ <Résultat> = ] NL_LitParam (<sNomParam> est chaîne [, <bRemplacerSousParam> est booléen [, <sValeurDéfaut>]])
+      //
+      // Paramètres :
+      //	sNomParam (chaîne UNICODE) : Nom du paramètre
+      //	bRemplacerSousParam (booléen - valeur par défaut=1) : Indique s'il faut gérer les sous paramètres
+      //	sValeurDéfaut (valeur par défaut="") : <indiquez ici le rôle de sValeurDéfaut>
+      // Valeur de retour :
+      // 	chaîne UNICODE : Valeur du paramètre
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_LitParam( local sNomParam est une chaine, local bRemplacerSousParam est un booleen = vrai, sValeurDéfaut = "") : chaine
+      
+      HLitRecherchePremier(NLConfiguration,NomParam,sNomParam)
+      si htrouve() ALORS
+      	sValParam est une chaine = NLConfiguration.ValParam
+      	si bRemplacerSousParam alors
+      		// Traitement des sous paramètres (un paramètre peut en inclure un autre en utilisant la syntaxe [[NOM_PARAM]]
+      		// Ce mécanisme est utilisé pour les URL des pages publiques
+      		nPosSousParamDebut est un entier = Position(NLConfiguration.ValParam,PREFIXE_ATTR)
+      		nPosSousParamFin est un entier = Position(NLConfiguration.ValParam,SUFFIXE_ATTR)
+      		si nPosSousParamDebut>0 et nPosSousParamFin>0 ALORS
+      			// Remplacement du sous paramètre	
+      			sNomSousParam est une chaine = sValParam[[nPosSousParamDebut+2 à nPosSousParamFin-1]]
+      			sValParam = remplace(sValParam,PREFIXE_ATTR+sNomSousParam+SUFFIXE_ATTR,NL_LitParam(sNomSousParam))
+      		FIN
+      	fin
+      	
+      	renvoyer sValParam
+      FIN
+      
+      renvoyer sValeurDéfaut
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer sValeurDéfaut
+     type : 458752
+   -
+     name : NL_EcritParam
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315525788190095845
+     type_code : 15
+     code : |1+
+      // Résumé : Modifie la valeur d'un paramètre global du site
+      // Syntaxe :
+      //NL_EcritParam (<sNomParam> est chaîne, <sValParam> est chaîne)
+      //
+      // Paramètres :
+      //	sNomParam (chaîne UNICODE) : Nom du paramètre
+      //	sValParam (chaîne UNICODE) : Valeur du paramètre
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_EcritParam( LOCAL sNomParam est une chaine, local sValParam est une chaine ) 
+      
+      HLitRecherchePremier(NLConfiguration,NomParam,sNomParam,hBlocageEcriture)
+      SI HTrouve() ALORS
+      	NLConfiguration.ValParam = sValParam
+      	hmodifie(NLConfiguration)
+      sinon
+      	hraz(NLConfiguration)
+      	NLConfiguration.NomParam = sNomParam
+      	NLConfiguration.ValParam = sValParam
+      	hajoute(NLConfiguration)
+      FIN
+      
+      CAS ERREUR:
+      ErreurPropage()
+      
+     type : 458752
+   -
+     name : NL_TraiteErreurDefaut
+     procedure_id : 1315866177206291288
+     type_code : 15
+     code : |1-
+      // Résumé : Traitement par défaut des erreurs non fatales
+      // Syntaxe :
+      // NL_TraiteErreurDefaut ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE NL_TraiteErreurDefaut()
+      
+      sMessage est une chaine = "Une erreur interne s'est produite."+RC+"Le responsable a été informé."+RC+"Merci de réessayer plus tard."+rc
+      si EnModeTest() alors
+      	sMessage += ErreurInfo(errComplet)
+      fin
+      
+      Erreur(sMessage)
+     type : 458752
+   -
+     name : NL_ListeParamMessage
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1357861207931637460
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_ListeParamMessage ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	tableau associatif : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_ListeParamMessage() : tableau associatif de chaines
+      
+      si gtaParam..Occurrence=0 alors
+      	pour TOUT NLConfiguration AVEC Masqué = faux
+      		gtaParam[NLConfiguration.NomParam] = ""
+      	FIN
+      	pour tout sVal, sCle de gtaParam
+      		sVal = NL_LitParam(sCle)
+      	FIN
+      fin
+      
+      renvoyer gtaParam
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	SupprimeTout(gtaParam)
+      	renvoyer gtaParam
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x1fc514644ee9d21a
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

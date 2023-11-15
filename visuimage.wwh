@@ -1,0 +1,101 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : visuimage
+ major_version : 28
+ minor_version : 0
+ type : 65538
+ description : ""
+ subtype : 8192
+page :
+ name : visuimage
+ identifier : 0x224c547ebf84f2ef
+ internal_properties : CAAAAAgAAAAPDx7Jvnoa8ZJix4cHNENQ2FbRXLv4hTkay34wUQ7npYOtD7IcKe4iOapNAcHbLydwAFEqhp7IsihL9LF9X+qfz3sm32ga9LYcs4pvU2Rtc4wHujagnQYnSL5SRYxWdk/vKI+NKlBofTG8SuX51EJwb2jsF/YzJQzyUbdWy2TQmBz7YnKCn5SghjSBdZFLp66mNKE1WMoIoOha/QjDXhhz0yQZIB67M41qb9bs2jjkzizM8npflNkXQE9TA2lfNhAzTbfoaq4Av4S2g1IpIAmGfsxtWudZfU/VfAseQ2GzKLY+FktsiZf63tfUA9ylXLdIkdUj3U8+Ib9TTI2ev/++8ZsxMkKhZSsOXCngH1b/I5vVyLDZ2FKaR1Mn2MkpvVhe94niSvP9bpKuB88XEJZK2dgiVycl3SbDhE8x+jgOgN+NOSxPeRNEnB1wTRrZg9FIFOSd5nP994Qp06GkyUOL2sgdAoOHykIJytLjcWXCmlPXLok1j9BtOa+EIgVU7GxWAjxggJC2RwK8ng7XIGntBmFsMc52bk+5CLgl+bSHBV+n90D5ZADSrZDIfjAL8AITSpBswx7MF70/dBvc2MVIUNXSqPTWa7KgssPysi20fyL8WBPtPcCvz8z6O6ayPohEU4n8oeo3byzRhXESSoc0VBNbRAY+K0IhjjMH7Ovu8JExtP8G0ut9V5wuv+jtSbjOkHug8cmuLb42P/gXni5SP70VxaPKVEJLiG8YoYrt0F1pcxT9SDRuCxfcF+bzxztWx9LXGtGRRHYlqhcvD46sN0406XGGNqypke365wxCLtwUpz/FVCYg3bGh/jEQMvquOInSULmYFg6XsA8uLDnbTewa3xzVLpbv3eGnoQr19X2SUnplGFCGGxH4GyyR/YBul231kfo2duqLt7P+8hcADIenDTtGJAfP0jowzU5B+rOcq+Wje+ylluSLTIYMUT3XpxR1P2aoHlGaFUHVJhwpfmLZJ2NJJk8MtY6IfwFObLQ7qnzI2VU1LsyYhArYKkXIxVBsLZNRJVT0vk5KwKxxzTZrGlpXTLAGDIjmgMC99fLRO9i5CZUljyD9aIabzM1fXJe1GpiMJ3fp8T+DDBpyO4+/gBpBU7T/ZQ/3PG2fFLIBFbc2CcwIi1q7+f4r1fZO+GW80d3xIh6w2+L6yJARcNl8Gdl6aI8VDYgWsG1FxOYC0C13fyzB7DNm+mX4WbIc/VXuodzc7BJAQRPnWQuTNJnv9XvCI9dhoSj2SggLjeCUyfJ4cvnlBXlgK18HHzpHZHbA2DkY7JP5H3eH7kLCJlalb520bdC5caeKGe1SC2MKfmT5KXOsUTkwf1FlZS7d927ASyI2kPH7l207Uww+uBC3poHXWvkimAfXZNaDKvKPB3XX7VpJt1JOTJ5frKwjRHXI2QpT8O9Ctt79XClgLA86eP2zJWQ+XgD5ofi3mfXLJ79gG3sLawLbmGj/AiyWSYGAdniwgnM1Uoy0SM6V7PuxUB9jZxEw67XLrg7msECZbtAopdZoG9eIM4JKbso/O1OXmPzgK04BUzAmG4SVQ4wAUoqvvgmpHtU4ZMgVS0+e1PdsX99K3rNGH+iONKkh6/CJMZARWdHNU08MZGg153cxuIUWWJrv8e78sMVUZDVEVpADrN9kDA/cfiJyvEb0NA5mrAthREPnL5AfviliA2zRcTJqBi8gCFDetuxscdrWfVlpKW9kXgTirXDs6j6QavFyuA/NEiI95uCHvJcXIRy9nyO1ETHkSFm+ENAQOb9KbUs9C1Emj+vS3TDxO4qKdAZuMgvlWHF8QfVNBXk/Q05bv7ROUDVZ9DjqfBOCLK0id+pkHyBqzTO4rnYf1Pq8hs1PuhmVkFKXrS8OksRtYum5L168ILs34YaRQUn+bkoLKa63ilS1E+XnIoM8xmMN8dnAkb+BlMAHtWGPrWQrv9J/xIndmWQtSl9Kt1ILV4EoLfhWqIxrA1sd3pHnbM3y9MdhvQ+XoOPjo0Y9twdaTpPPzSh5rAHzCZxgob7pmkPWm21wyYoZm50oZG5GFDESdvKSMHQ9j4NzJTSHVpZicktoqopAn4i4gbW7AHnzyK5EaWUnfTDL305fe5s22ylqsxCt/Gsr0ybK0pVtfIxjcPZcvhGVagWpCdoJMpH9u7MJJ2gGAa0Q0piVcxd6W86W4X0Kd/RlaPsXyEJ0Rcvz2ko08E3KUbN0L5pEI8H/i+O0Xz8XYs45GeeqdoJxtjwogwv0tOo6pF0/8PeXk4/ObJ0vp1vfkbgMMOMVvGDCQBTBws2Seg1Q8m95ilFmD/f+cEMCoHzyQf3fmiLsnYZyqyOoWYmXZMzbqjE9L8ngTICyCqvsnjbq8JDOLcmcItgmfsUjPQ11LFFIq5dsgftBMklSgbadeAcvSrfajyHiRDXhq7BdjzbN86l0EWfCCpFmx3OIvg9LqpcalqaVBHs8La+1eWYP1VWi4E5laHaLaS5hzP2O9QED3AFepzQcy+0ADtwFIQITkWoem0v5O8atpUSaFG3ShWtHnaM5H+Zj3rnBcPUsE+lIW5LjkjztAIaBOgjfBd5gqgmt55gzeh5cV6vi1cmeJZMlAMqG8zpLUTob/W/dME0GK+t/jhJlD07vZaEqvwm0qKAEqVRu/qztoFyQooDeu/QoUsFau064TKhIxjRpRZep6ESc1wsYy04HGlV8iHJaBdGRLjSTRbNIVa4xMbpXuTg/u4ngyqfFZ9D/iAxsvB1KtgxuVXDLPvcINtae9qHA3/qqtvxk4xGTPx4vuSBMtfNBosBKv86rR6psVbaQt86TVkXoz6wibCSGHirFuVwk4FkzeLqV7y5EyMU8vnAoNe2BXIwNLpshX0LDlOteVDxU80A+LlpkObjULw8tzA3/TESL048Lz5YK0CcNmtuphkUTCLInYufA25aGqMDEVxYH9Iy6BW4vtfCYl+1V6QGYy505vAPH6cHvDKrqdEbcL+b1Krcc5/NmCbgeMUya32C0X4GfUvLKGZLeTyDFSEM4xeXGMGP0+9htWA8Hg/qmnbkposRGmF/BAsK2Ekb2RVlMI7yhCIAT9ePi7WAW8ARR7j+XgzwNws/cImcQCytxiqDvVvvtYPdLYyXRBk2FJPbi+hLWUr8fRE1Wzybm2Ce+A+ryWeoUhFh/1QZ9kwtIFbstkOQIH0+PmaXWnGDxJ/HPRJ5Hgybi3Mk6t7Jbyru25r9P2h4cGAbu8+9/1jRMiBWU+7ZXRFk9ioZzka85YJdQt9RLGbosnFC9QhIuWQGNmdzLMa5K4pnKvP7/gh+n1UoUknNkD5gD9m4GPeWZmTLTtEqNZo6eZB9c+oEiKeg6E4QcYrrPurogQ8DR6e9yrHj07NsEg93hArwx3cza6Zf0LqLxBX3lVRjyGyIHN4T8N/71iQ08DyzEDmBheabcy2WJIOHTqKpbR2906DZZe07vNky/3x+JKH5uxa5QuOkXPgge2+rDH2hRJD+Tv8CVCf3kAdXewoGKQVkpvlRxYjXnd3RPFGdW1SmovS4XbrXxH7OKxaLzWCVNnu2ASf2nST2z/CeD3u1tlSpi7soD2lEyCCzHqu1Q2oB8+dYiS5AV7rdNTFWpuk3Pr64A77W0yP+Ds/xnOy6/FhNESG90J/1wagIx3lk7gz4GsNl2teErOUZ7LjlR+iuzNJiGtCHjw1nkDEO2WR5OXNXikDjOY9DcNdJc4VLch8siG6FZCnxRUx5HJCZHhL5IldpxbMkRY7yHo+qFC0sRc2YWg8Fl7lcuPKgtsKf6yWgld8Z7Uh3V/4QAA63fTWI53Emss6Z6xVCsJnWZdUSb9xEB3CFpsBvDlRZ+sS//+jSovcFzBKX0k38S1sshMtbK1519jigZ7kjiKl/79uWGV3Nwu3INM+P5spDAcaY+dkDSqIuXToiAsFx9amisfsqbbonqX79nv8GCzhFh3oBamS3/7MPX1qV0lBzQoTT5Fjx0nre44ccXMJobUPxm1Lf6ZFDsCQfVsKnMarc1QznN/AwB/h0E/6uPuOEMOHMSV7bQ7q/CTbo7u+v6J6j6oPCVlPxjUkVDa9yF+UkBlohsL/r3fAx/3KZLsVCNLmc2j9jdXBu7woGQR/IeSkOiwg2faEGwMJf4SDhbffvTjjwur6Fcl6T7Mk1u7OENg6rbVvyuNlk7dIWeAliN6E/Js2e8w8VnMFEnIJ509adXrdPh/mQQe891sBwS9hGYzTO4zYaBks/nOudFs2FlRPqBuhvBvW9JXscXqN6An/w8Um/uBKDNPKjYYJUPtpuX2V3XBtZ6+1rhuSEsT/zlOspWZV2pRYAQIpZBJv+urddW88/tDrnx/KcqeaiImy7UVBwm6TdVRbio+PPvdINqHTslDHexUtUX9Jy4qPd6le+ohpU004chBYV2BBNiiOpOxDBhyAYzJj9dFCfkfFX8A6O8VJuct1DqdQ9wvEoZ01sKwcgIoeDPDeaxFladgQVpRgMXkqFBWX4ynYSrBTH8s8b1s0tKV6A9mGVpLLih503v7raLyRlmQFV4v6cc7EXqfwvSpzHYoE4LUzlChneKlQ6vhGZBpOSL5RD52x8tUC/vHik/Eqg3pqm1TnHJ5RkuhHvCgejYxgFImYCTWahQb6uChgQDStfSBEERJKtujfyM0ifue3O4ZzPcyhHixGZWvmrCjbXhw4vNgzQM3YuOqA0pQQ3iLUIMmWN8FZfWc/nb3d7a3zx39nJj5qRUPei2F+nNwiLniy6guTnD0zcYP5yG/nCP1GMGt0+G/rfrEeDbheEBQiS/lp0L2OdNJw==
+ properties : {}
+ type : 1
+ languages :
+  - fr-FR
+ code_elements :
+  type_code : 38
+  p_codes :
+   -
+     internal_properties : CAAAAAgAAAD3PfhAj13+e3Tq365W/blzvSGdoN6J5K4US3kiB8bjYfoY0ANQmI+kHwpltaxV/4XJzvToP9zvc0FAUaUEhW3Nud9GGA0xCOiIYt4jowi+e0qmBhgGkQ==
+     code : |1-
+      // Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      // Si on reçoit un token, il faut noter l'ouverture
+      sTokenOuverture est une chaine = PageParamètre(PAGEPARAM_TOKENOUVERTURE)
+      si sTokenOuverture<>"" ALORS
+      	NL_Attache_NoteOuverture(sTokenOuverture)
+      FIN
+      
+      // Retourne l'attachement
+      nIDAttache est un entier sur 8 = PageParamètre(PAGEPARAM_IDATTACH)
+      nLargeur est un entier = PageParamètre(PAGEPARAM_LARGEUR)
+      nHauteur est un entier = PageParamètre(PAGEPARAM_HAUTEUR)
+      stAttach est un STInfoAttache = NL_Attache_Construit(nIDAttache,nLargeur,nHauteur)
+      
+      mapage..titre = stAttach.Description
+      ChaîneAffiche(stAttach.Contenu,stAttach.Type,stAttach.Nom)
+      
+      CAS ERREUR:
+      	// TODO : afficher une page d'erreur
+      	chaineaffiche("Erreur")
+     type : 851996
+   -
+     type : 852017
+     enabled : false
+   -
+     type : 852119
+     enabled : false
+   -
+     type : 852298
+     role : N
+   -
+     type : 851999
+     role : N
+   -
+     type : 852000
+     role : N
+   -
+     type : 852232
+     enabled : false
+   -
+     type : 852167
+     enabled : false
+   -
+     type : 852169
+     role : N
+     enabled : false
+   -
+     type : 852225
+     role : N
+     enabled : false
+   -
+     type : 852227
+     enabled : false
+   -
+     type : 1310979
+     enabled : false
+   -
+     type : 852228
+     role : N
+     enabled : false
+   -
+     type : 852217
+     role : N
+     enabled : false
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : PAGE_SansNom1
+resources :
+ string_res :
+  identifier : 0x1fc51464505ad297
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+webification :
+ internal_properties : CAAAAAgAAACYzxT95H3qP7nIys4LqA==
+custom_note :
+ internal_properties : CAAAAAgAAAC68/W0/adbG0nFCRhrE42B5HRnbDzVHaz86sSQyxlBk7I=
+rad :
+ internal_properties : CAAAAAgAAABoAN7PLpwJW3EiA7WVZdCA5EwrCA1rvutcDHooMWKe

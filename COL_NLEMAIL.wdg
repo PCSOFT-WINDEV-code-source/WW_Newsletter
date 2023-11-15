@@ -1,0 +1,649 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : COL_NLEMAIL
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x124012480135aa16
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1-
+      constante
+      	MAIL_PRIORITE_HAUTE = 3
+      	MAIL_PRIORITE_NORMALE = 2
+      	MAIL_PRIORITE_BASSE = 1
+      	
+      	MAIL_SANS_LISTE = 0
+      	MAIL_SANS_MESSAGE = 0
+      	MAIL_SANS_UTILISATEUR = 0
+      	
+      	MAIL_STATUS_EN_ATTENTE = 1
+      	MAIL_STATUS_ENVOYE = 2
+      	MAIL_STATUS_ERREUR = 3
+      	MAIL_STATUS_ERREUR_TRAITE = 4
+      fin
+      
+      STInfoFile est une structure
+      	nIDNLListe est un entier sur 8
+      	sNomListe est une chaine
+      	nIDNLMessage est un entier sur 8
+      	sSujetMessage est une chaine
+      	tabNbMessage est un tableau de 4 entiers
+      FIN
+     type : 720896
+  procedures :
+   -
+     name : NL_EMail_AjouteMessageAEnvoyer
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315073425042676132
+     type_code : 15
+     code : |1+
+      // Résumé : Ajoute un email dans la file d'attente des envois
+      // Syntaxe :
+      //NL_EMail_AjouteMessageAEnvoyer (<cMel> est Email, <nIDListeAssociee> est entier sur 8 octets, <nIDMessageAssocie> est entier sur 8 octets, <nIDUtilisateurAssocie> est entier sur 8 octets [, <nPriorite> est entier])
+      //
+      // Paramètres :
+      //	cMel (Email) : Contenu de l'email
+      //	nIDListeAssociee (entier sur 8 octets) : NLListe associée à ce mail (MAIL_SANS_LISTE si aucune liste associée)
+      //	nIDMessageAssocie (entier sur 8 octets) : NLMessage associé à ce mail (MAIL_SANS_MESSAGE si aucune liste associée)
+      //	nIDUtilisateurAssocie (entier sur 8 octets) : Utilisateur associé à ce mail (obligatoire)
+      //	nPriorite (entier - valeur par défaut=2) : Priorité d'envoi
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_EMail_AjouteMessageAEnvoyer( local cMel est un email, local nIDListeAssociee est un entier sur 8, local nIDMessageAssocie est un entier sur 8, local nIDUtilisateurAssocie est un entier sur 8, local nPriorite est un entier = MAIL_PRIORITE_NORMALE)
+      
+      hraz(NLElementFile)
+      NLElementFile.IDNLListe = nIDListeAssociee
+      NLElementFile.IDNLMessage = nIDMessageAssocie
+      NLElementFile.IDNLUtilisateur = nIDUtilisateurAssocie
+      NLElementFile.Priorité = nPriorite
+      NLElementFile.Essais = 0
+      NLElementFile.Status = MAIL_STATUS_EN_ATTENTE
+      NLElementFile.DateHeureEnvoi = NLMessage.DateHeureEnvoi
+      
+      EmailConstruitSource(cMel)
+      NLElementFile.ContenuMail = cMel.Source
+      
+      hajoute(NLElementFile)
+      
+      CAS ERREUR:
+      	ErreurPropage()
+     type : 458752
+   -
+     name : NL_Email_EnvoyerMailPrioritaires
+     internal_properties : CAAAAAgAAABzyh4b9ZmPLuB46P+c1uOXHUuPP6Vdo4GM5FgmPtb5mDd1n5SYtZsCaJ8LoVDNnFCIzqPGXmS3lWliWNDG40O0X3shdL5FmKF6yYRQ/mIJvsX+j7LDeyhjgpdcmCdS/saoBBP8qb724s8UkK4djDHAxc+q9S3525a4+7hblzBF2X1j+v0=
+     procedure_id : 1315115588744078668
+     type_code : 15
+     code : |1-
+      // Résumé : Procédure de traitement de la file d'attente des emails
+      // Syntaxe :
+      //NL_Email_EnvoyerMailPrioritaires ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Email_EnvoyerMailPrioritaires()
+      
+      // Ouvre la session
+      cSession est un EmailSessionSMTP
+      cSession.AdresseServeur = NL_LitParam(PARAM_SMTP_SERVEUR)
+      cSession.Port = NL_LitParam(PARAM_SMTP_PORT)
+      cSession.Nom = NL_LitParam(PARAM_SMTP_NOM)
+      cSession.MotDePasse = NL_LitParam(PARAM_SMTP_PASSE)
+      cSession.Option = (NL_LitParam(PARAM_SMTP_TLS)=1) ? emailOptionSécuriséTLS SINON emailOptionDéfaut
+      
+      SI EmailOuvreSession(cSession) = Faux ALORS
+      	dbgAssertion(Faux)
+      FIN
+      
+      REQ_RechercheEmail.pPriorite = MAIL_PRIORITE_HAUTE
+      REQ_RechercheEmail.pStatus = MAIL_STATUS_EN_ATTENTE
+      
+      SI HExécuteRequête(REQ_RechercheEmail) = Faux ALORS
+      	NL_Log_Ajoute("Impossible de se connecter au serveur SMTP",LOG_ERREUR)
+      FIN
+      
+      _BoucleEnvois(cSession)
+      
+      // Referme la session
+      EmailFermeSession(cSession)
+      
+      CAS ERREUR:
+      	NL_Log_Ajoute("Une erreur est survenue pendant l'envoi d'un mail prioritaire : "+erreurinfo(),LOG_ERREUR)
+      	
+     type : 458752
+   -
+     name : NL_Email_NbMailEtat
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1315922522893925658
+     type_code : 15
+     code : |1-
+      // Résumé : Compte le nombre de mail dans la file dans un état donné
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Email_NbMailEtat (<nEtat> est entier [, <nIDMessage> est entier sur 8 octets])
+      //
+      // Paramètres :
+      //	nEtat (entier) : Etat recherché
+      //	nIDMessage (entier sur 8 octets - valeur par défaut=0) : <indiquez ici le rôle de nIDMessage>
+      // Valeur de retour :
+      // 	Type indéterminé : Nombre de mails
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Email_NbMailEtat( local nEtat est un entier, local nIDMessage est un entier sur 8 = 0 )
+      
+      si nIDMessage>0 alors
+      	HExécuteRequête(REQ_CompteMailEnEtat,hRequêteDéfaut,nEtat,nIDMessage)
+      sinon
+      	HExécuteRequête(REQ_CompteMailEnEtat,hRequêteDéfaut,nEtat,null)
+      fin
+      
+      renvoyer REQ_CompteMailEnEtat.NbElementFile
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer 0
+     type : 458752
+   -
+     name : NL_Email_EnvoyerMails_Planifiee
+     internal_properties : CAAAAAgAAAAB1IopE2AseB/hw/ZfFULWcjSMLrZAVnDbvevR6XFPUuHrifZWNfkewBAmTRafnYg15IBlZpxDOPW3WcEFbOYJTUKiibA7by8hZ8v189UuUffLlHIBAQqdqsAMLlu+6Chy7sVKX88Zb6wtIemM/WgJDOahnnaglNF3Krf0LYLpfYnxCO8=
+     procedure_id : 1318125974324404087
+     type_code : 15
+     code : |1-
+      // Résumé : Procédure de traitement de la file d'attente des emails
+      // Syntaxe :
+      //NL_Email_EnvoyerMails_Planifiee ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Email_EnvoyerMails_Planifiee()
+      
+      _TraitePlanification()
+      
+      // Vérifie que les envois sont actifs
+      si NL_LitParam(PARAM_ENVOI_ACTIF,Faux,"0")="1" ALORS
+      	// Fait l'envoi effectif
+      	_EnvoyerMails()
+      fin
+      
+      CAS ERREUR:
+      	NL_Log_Ajoute("Une erreur est survenue pendant l'envoi d'un mail : "+ErreurInfo(),LOG_ERREUR)
+      	
+     type : 458752
+   -
+     name : _BoucleEnvois
+     procedure_id : 1318134783303199152
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //_BoucleEnvois (<cSession>)
+      //
+      // Paramètres :
+      //	cSession : <indiquez ici le rôle de cSession>
+      // Valeur de retour :
+      // 	Aucune
+      //
+      // Exemple :
+      // Indiquez ici un exemple d'utilisation.
+      //
+      PROCEDURE PRIVÉE _BoucleEnvois(cSession)
+      
+      
+      // Reconstruction de l'email
+      cMel est un email
+      nNbEnvoyés est un entier
+      nNbEnvoisParPassage est un entier 
+      nNbEssaisParMail est un entier 
+      nNbTempsEntreEssais est un entier 
+      nNbTentatives est un entier 
+      
+      
+      nNbEnvoisParPassage = NL_LitParam(PARAM_NB_MAILS_PASSAGE,*,50)
+      nNbEssaisParMail = NL_LitParam(PARAM_NB_ESSAIS_MAIL,*,3)
+      nNbTempsEntreEssais = NL_LitParam(PARAM_TEMPS_ENTRE_ESSAI,*,3)
+      si nNbEnvoisParPassage = 0 ALORS
+      	// Si le nombre d'envois est défini à 0, on prend tout ce qu'il y a à envoyer
+      	nNbEnvoisParPassage = hnbenr(REQ_RechercheEmail)
+      FIN
+      POUR TOUT REQ_RechercheEmail 
+      
+      	HLitRecherchePremier(NLElementFile,IDNLElementFile,REQ_RechercheEmail.IDNLElementFile,hBlocageEcriture)
+      	SI HTrouve(NLElementFile) = faux ALORS
+      		NL_Log_Ajoute(chaineconstruit("Impossible de trouver l'élément à envoyer (%1)",REQ_RechercheEmail.IDNLElementFile),LOG_WARNING)
+      		CONTINUER
+      	FIN
+      		
+      		
+      				
+      	// Import de la source
+      	cMel.Source = REQ_RechercheEmail.ContenuMail
+      	
+      	SI EmailImporteSource(cMel) = Faux ALORS
+      		NL_Log_Ajoute("Impossible d'importer la source de l'email",LOG_ERREUR)
+      		continuer
+      	FIN
+      	
+      	cMel.Message = cMel.TexteBrut
+      	
+      	nNbTentatives = 0
+      	// Envoi (en boucle pour le nombre de tentatives)
+      	BOUCLE
+      		
+      		SI EmailEnvoieMessage(cSession,cMel,emailOptionEncodeEntête) = Faux ALORS
+      			nNbTentatives++
+      			
+      			// Attends un peu
+      			ThreadPause(nNbTempsEntreEssais * 100)
+      			
+      		SINON
+      			// Passage en envoyé
+      			NLElementFile.Status = MAIL_STATUS_ENVOYE
+      			NLElementFile.DateHeureEnvoi = DateSys + HeureSys()
+      			NLElementFile.Essais = nNbTentatives
+      			
+      			SORTIR
+      			
+      		FIN
+      		
+      		SI nNbTentatives > nNbEssaisParMail ALORS
+      			// Passage en envoyé
+      			NLElementFile.Status = MAIL_STATUS_ERREUR
+      			NLElementFile.Détails = ErreurInfo(errcomplet)
+      			NLElementFile.DateHeureEnvoi = DateSys + HeureSys()
+      			NLElementFile.Essais = nNbTentatives
+      			NL_Log_Ajoute("Impossible d'envoyer l'email" + RC + RC + REQ_RechercheEmail.ContenuMail,LOG_ERREUR)
+      			SORTIR
+      		FIN
+      		
+      	FIN
+      	
+      	// Modification de l'élément 
+      	SI HModifie(NLElementFile)	= Faux ALORS
+      		NL_Log_Ajoute(chaineconstruit("Impossible de modifier l'élément <%1>",REQ_RechercheEmail.IDNLElementFile)  + RC + RC + REQ_RechercheEmail.ContenuMail,LOG_WARNING)
+      		dbgAssertion(Faux)
+      	FIN
+      	
+      	// On recommencera au prochain passage
+      	SI nNbEnvoyés > nNbEnvoisParPassage ALORS
+      		SORTIR
+      	FIN
+      	
+      		
+      	CONTINUER:
+      		nNbEnvoyés++	
+      FIN
+     type : 458752
+   -
+     name : NL_Email_EnvoiPlanifié
+     internal_properties : CAAAAAgAAACa7ZUylPrkOq8bzKLNxSWRwPBZVPMXTvszDke5Z1JHfe9m3GIUVoYm1K1ZsqS74mlrm2P3BaXU46oqTRmvh5JSkC6LrEF2tXLHf3sI6xI/YOI9JxsuNcx/qC9SkPg7Edu/AkH5Mm3fj0GAusg7pMGkk+13wNM1PEx1phWu6Y4=
+     procedure_id : 1318887575271103254
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //NL_Email_EnvoiPlanifié ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE NL_Email_EnvoiPlanifié()
+      
+      NL_Email_EnvoyerMailPrioritaires()
+     type : 458752
+   -
+     name : NL_Email_RecupèreInfoFile
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1319140308126712193
+     type_code : 15
+     code : |1-
+      // Résumé : Retourne l'état des files d'attente
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Email_RecupèreInfoFile ( [<nFiltreParNLListe> est entier sur 8 octets [, <nFiltreParNLMessage> est entier sur 8 octets]])
+      //
+      // Paramètres :
+      //	nFiltreParNLListe (entier sur 8 octets - valeur par défaut=-1) : Ne retourne les infos que pour une Newsletter
+      //	nFiltreParNLMessage (entier sur 8 octets - valeur par défaut=-1) : Ne retourne les infos que pour une instance de Newsletter
+      // Valeur de retour :
+      // 	tableau : tableau d'infos
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Email_RecupèreInfoFile( local nFiltreParNLListe est un entier sur 8 = -1 , local nFiltreParNLMessage est un entier sur 8 = -1 ) : tableau de STInfoFile
+      
+      tabInfo est un tableau de STInfoFile
+      tabVide est un tableau de STInfoFile
+      
+      REQ_EtatFileEnvoi.pNLListe = (nFiltreParNLListe>0) ? nFiltreParNLListe sinon null
+      REQ_EtatFileEnvoi.pNLMessage = (nFiltreParNLMessage>0) ? nFiltreParNLMessage sinon null
+      
+      HExécuteRequête(REQ_EtatFileEnvoi)
+      
+      pour TOUT REQ_EtatFileEnvoi 
+      	stInfo est un STInfoFile
+      	stInfo.nIDNLListe = REQ_EtatFileEnvoi.IDNLListe
+      	stInfo.nIDNLMessage = REQ_EtatFileEnvoi.IDNLMessage
+      	stInfo.sNomListe = REQ_EtatFileEnvoi.Nom
+      	stInfo.sSujetMessage = REQ_EtatFileEnvoi.Sujet
+      	stInfo.tabNbMessage[REQ_EtatFileEnvoi.Status] = REQ_EtatFileEnvoi.NbEmails
+      	ajoute(tabInfo,stInfo)
+      FIN
+      
+      renvoyer tabInfo
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer tabVide
+     type : 458752
+   -
+     name : NL_Email_DernierEnvoi
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1357466878294841261
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Email_DernierEnvoi ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Type indéterminé : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Email_DernierEnvoi()
+      
+      dFutur est une date = datesys()
+      dFutur..Jour+=1
+      
+      HExécuteRequête(REQ_RechercheFileParStatus,hRequêteDéfaut,MAIL_STATUS_ENVOYE,NULL,dFutur)
+      HLitDernier(REQ_RechercheFileParStatus)
+      
+      renvoyer REQ_RechercheFileParStatus.DateHeureEnvoi
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer ""
+     type : 458752
+   -
+     name : NL_Email_ProchainEnvoi
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1357468523267370902
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Email_ProchainEnvoi ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Type indéterminé : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Email_ProchainEnvoi()
+      
+      HExécuteRequête(REQ_RechercheFileParStatus,hRequêteDéfaut,ETAT_PROGRAMME,DateSys(),null)
+      HLitPrémier(REQ_RechercheFileParStatus)
+      
+      RENVOYER REQ_RechercheFileParStatus.DateHeureEnvoi
+      
+      CAS ERREUR:
+      ErreurPropage()
+      RENVOYER ""
+     type : 458752
+   -
+     name : _EnvoyerMails
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1357738818400385426
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //_EnvoyerMails ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE privee _EnvoyerMails()
+      
+      // Ouvre la session
+      cSession est un EmailSessionSMTP
+      cSession.AdresseServeur = NL_LitParam(PARAM_SMTP_SERVEUR)
+      cSession.Port = NL_LitParam(PARAM_SMTP_PORT)
+      cSession.Nom = NL_LitParam(PARAM_SMTP_NOM)
+      cSession.MotDePasse = NL_LitParam(PARAM_SMTP_PASSE)
+      cSession.Option = (NL_LitParam(PARAM_SMTP_TLS)=1) ? emailOptionSécuriséTLS SINON emailOptionDéfaut
+      
+      SI EmailOuvreSession(cSession) = Faux ALORS
+      	NL_Log_Ajoute("Echec de l'ouverture de la session SMTP."+ErreurInfo(),LOG_ERREUR)
+      	retour
+      FIN
+      
+      REQ_RechercheEmail.pPriorite = MAIL_PRIORITE_NORMALE + ";" + MAIL_PRIORITE_BASSE
+      REQ_RechercheEmail.pStatus = MAIL_STATUS_EN_ATTENTE
+      
+      SI HExécuteRequête(REQ_RechercheEmail) = Faux ALORS
+      	NL_Log_Ajoute("Impossible de se connecter au serveur SMTP",LOG_ERREUR)
+      	RETOUR
+      FIN
+      
+      _BoucleEnvois(cSession)
+      
+      // Referme la session
+      EmailFermeSession(cSession)
+      
+      CAS ERREUR:
+      	erreurpropage()
+      	retour
+      	
+     type : 458752
+   -
+     name : NL_Email_EnvoyerMail_Manuel
+     internal_properties : CAAAAAgAAADoMxWSZil/3/Ae6qttAdUdJp1Nx3XLqs1Uiv7QNqLDevH7RNaXYzdC9U6YRgcF6LtbOpyocqfKQLzPgxoVR4zxWHDtX5Jugb5AVsgW+tYPAMa5xUA358yplZGfKns8WNGjojkmE5Qe0KHWxopLO3CNVlBDdQmxturewbbLmD+2SPJa4YY=
+     procedure_id : 1357739338092204617
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //NL_Email_EnvoyerMail_Manuel ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Email_EnvoyerMail_Manuel()
+      
+      // Ajoute les planifications échues
+      _TraitePlanification()
+      
+      // Fait l'envoi effectif
+      _EnvoyerMails()
+      
+      CAS ERREUR:
+      NL_Log_Ajoute("Une erreur est survenue pendant l'envoi d'un mail : "+ErreurInfo(),LOG_ERREUR)
+     type : 458752
+   -
+     name : _TraitePlanification
+     procedure_id : 1363037674228356506
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      // _TraitePlanification ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      // _TraitePlanification ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //
+      PROCEDURE PRIVÉE _TraitePlanification()
+      
+      dhMaintenant est un dateheure
+      
+      // Passage de l'état "En attente" à l'état "En cours"
+      pour TOUT NLMessage AVEC EtatNL = ETAT_PROGRAMME
+      	si NLMessage.DateHeureEnvoi<dhMaintenant ALORS
+      		// La newsletter est en cours d'envoi
+      		NLMessage.EtatNL = ETAT_ENVOIENCOURS
+      		hmodifie(NLMessage)
+      		// Génère les emails
+      		NL_GénèreElémentsFile(NLMessage.IDNLMessage)
+      	FIN
+      FIN
+      
+      // Passage de l'état "En cours" à l'état "Terminé"
+      POUR TOUT NLMessage AVEC EtatNL = ETAT_ENVOIENCOURS
+      	si NL_Email_NbMailEtat(MAIL_STATUS_EN_ATTENTE,NLMessage.IDNLMessage)=0 ALORS
+      		NLMessage.EtatNL = ETAT_ENVOITERMINE
+      		hmodifie(NLMessage)
+      	FIN
+      FIN
+     type : 458752
+   -
+     name : NL_EMail_RecupereTexte
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1363367458986833612
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_EMail_RecupereTexte (<nIDElementFile> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDElementFile (entier sur 8 octets) : <indiquez ici le rôle de nIDElementFile>
+      // Valeur de retour :
+      // 	chaîne UNICODE : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_EMail_RecupereTexte( local nIDElementFile est un entier sur 8 )
+      
+      HLitRecherchePremier(NLElementFile,IDNLElementFile,nIDElementFile)
+      
+      cMel est un Email
+      cMel..Source = NLElementFile.ContenuMail
+      EmailImporteSource(cMel)
+      
+      renvoyer cMel.TexteBrut
+      
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer ""
+     type : 458752
+   -
+     name : NL_EMail_RecupereHTML
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1363375073967129748
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_EMail_RecupereHTML (<nIDElementFile> est entier sur 8 octets)
+      //
+      // Paramètres :
+      //	nIDElementFile (entier sur 8 octets) : <indiquez ici le rôle de COL_IDElementFile>
+      // Valeur de retour :
+      // 	Type indéterminé : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_EMail_RecupereHTML(LOCAL nIDElementFile est un entier sur 8 )
+      
+      HLitRecherchePremier(NLElementFile,IDNLElementFile,nIDElementFile)
+      
+      cMel est un Email
+      cMel..Source = NLElementFile.ContenuMail
+      EmailImporteSource(cMel)
+      
+      RENVOYER cMel.html
+      
+      
+      CAS ERREUR:
+      ErreurPropage()
+      RENVOYER ""
+      
+     type : 458752
+   -
+     name : NL_EMail_StatusVersTexte
+     procedure_id : 1363382311005486365
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] NL_EMail_StatusVersTexte (<nStatus> est entier)
+      //
+      // Paramètres :
+      //	nStatus (entier) : <indiquez ici le rôle de nStatus>
+      // Valeur de retour :
+      // 	chaîne UNICODE : // 	Aucune
+      //
+      PROCEDURE NL_EMail_StatusVersTexte( local nStatus est un entier )
+      
+      selon nStatus
+      	CAS MAIL_STATUS_EN_ATTENTE
+      		renvoyer "En attente"				
+      	CAS MAIL_STATUS_ENVOYE
+      		renvoyer "Envoyé"
+      	CAS MAIL_STATUS_ERREUR
+      		renvoyer "En erreur"
+      	CAS MAIL_STATUS_ERREUR_TRAITE
+      		renvoyer "En erreur (traité)"
+      FIN
+      
+      ErreurDéclenche(1,"Status d'email inconnu")
+      renvoyer ""
+      
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x1fc514644f68d249
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

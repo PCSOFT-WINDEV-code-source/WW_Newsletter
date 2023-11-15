@@ -1,0 +1,121 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : COL_NLLOG
+ major_version : 28
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x124af6b704e3ea97
+ internal_properties : CAAAAAgAAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1+
+      ETypeLog est une énumération
+      	LOG_INFO = 1	
+      	LOG_WARNING = 2
+      	LOG_ERREUR = 3
+      FIN
+      
+      STInfoLog est une structure
+      	IDNLLog est un entier sur 8
+      	Type est un entier
+      	DateHeure est un dateheure
+      	Détails est une chaine
+      FIN
+     type : 720896
+  procedures :
+   -
+     name : NL_Log_Ajoute
+     procedure_id : 1318137841320233301
+     type_code : 15
+     code : |1-
+      // Résumé : Permet d'ajouter une entrée dans le LOG
+      // Syntaxe :
+      //NL_Log_Ajoute (<sMessage> [, <eType> est énumération])
+      //
+      // Paramètres :
+      //	sMessage : Le message à ajouter
+      //	eType (énumération) : Le type de log
+      
+      PROCEDURE NL_Log_Ajoute(sMessage, eType est un ETypeLog = LOG_INFO)
+      
+      bErreurDétectée est un booléen = ErreurDétectée
+      
+      hraz(NLLog)
+      
+      nllog.DateHeure = datesys + HeureSys()
+      nllog.Détails = sMessage
+      
+      nllog.Type = eType..Valeur
+      
+      selon eType
+      	cas LOG_ERREUR,LOG_WARNING
+      		si bErreurDétectée ALORS
+      			NLLog.Détails += RC + RC + erreurinfo(errcomplet)
+      			
+      		FIN
+      		
+      		dbgAssertion(Faux, sMessage)
+      	AUTRE CAS
+      		
+      FIN
+      
+      
+      hAjoute(NLLog)
+     type : 458752
+   -
+     name : NL_Log_Consulte
+     internal_properties : CAAAAAgAAAAM34km+p2LM0Jafr/gijXeTImHicFj7lFu9FrqtgEK91qgYssHbROYrXPWPQuCRnMMZ684xbe6oq1nscH9xKapdVr2FWTPC1MVk/+hO52w5+vn7IjZ6fSvrcAYUpDA0PhZ/QJLYO5TzRKT4VFwJvmoQ216mG+7u8SECyh/lCtC1H7uDeo=
+     procedure_id : 1318853718007321372
+     type_code : 15
+     code : |1-
+      // Résumé : Retourne les logs compris entre deux dates et d'une gravité supérieur à la gravité demandée
+      // Syntaxe :
+      //[ <Résultat> = ] NL_Log_Consulte (<dhDebut> est dateheure, <dhFin> est dateheure, <nGraviteMin> est entier)
+      //
+      // Paramètres :
+      //	dhDebut (dateheure) : <indiquez ici le rôle de dhDebut>
+      //	dhFin (dateheure) : <indiquez ici le rôle de dhFin>
+      //	nGraviteMin (entier) : <indiquez ici le rôle de nGraviteMin>
+      // Valeur de retour :
+      // 	tableau : // 	Aucune
+      //// Traitement automatique des erreurs :   exécuter le bloc de code CAS ERREUR
+      //
+      
+      PROCEDURE NL_Log_Consulte( local dhDebut est un dateheure, local dhFin est un dateheure, local nGraviteMin est un entier )
+      
+      tabLog est un tableau de STInfoLog
+      
+      si dhDebut>dhFin alors
+      	dhDebut <=> dhFin
+      FIN
+      
+      si nGraviteMin<1 alors
+      	nGraviteMin=LOG_INFO
+      FIN
+      
+      HExécuteRequête(REQ_LectureLog,hRequêteDéfaut,nGraviteMin,dhDebut,dhFin)
+      FichierVersTableau(tabLog,REQ_LectureLog)
+      
+      RENVOYER tabLog
+      
+      CAS ERREUR:
+      	ErreurPropage()
+      	renvoyer tabLog
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : CAAAAAgAAACVGQgYbalU7DKC3oH4ItDrjtcTHXXV/EuH8q0IbhyQlw==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x1fc514644ed9d20a
+  internal_properties : CAAAAAgAAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : CAAAAAgAAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ
